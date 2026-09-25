@@ -99,6 +99,7 @@ public class Playgame
         userPlayer.add(Deck.deck.remove(0));
         botPlayer.add(Deck.deck.remove(0));
         botPlayer.get(0).setHidden(true);
+        userPlayer.get(0).setHidden(true);
         botPlayer.add(Deck.deck.remove(0));
         userTrump.add(TrumpDeck.deck.get(Trump1));
         PlayerTrumps++;
@@ -137,18 +138,30 @@ public class Playgame
         System.out.println("Target: " + target + " | Your Score: " + userValue + " | Bot's Visible Score: " + botKnown);
         System.out.println("Your Lives: " + sawPlace + " | Opponent's Lives: " + opponentSaw + " | Current Bet: " + bet + "\n");
         System.out.print("Your Hand: ");
+        int looper = 0;
         for (Card c : userPlayer) 
         {
-            if (c != null) {
+            if (c != null) 
+            {
                 String hiddenTag = c.getHidden() ? " (Hidden)" : "";
-                System.out.print("[" + c.getNumber() + "]" + hiddenTag + " ");
+                String comma = (looper == userPlayer.size() - 1) ? "" : ", ";
+                System.out.print(" [" + c.getNumber() + "]"+ hiddenTag + comma);
+                looper++;
             }
         }
         System.out.print("\nOpponent Hand: ");
+        looper = 0;
         for (Card c : botPlayer) 
         {
-            if (c == null) continue;
-            System.out.print(c.getHidden() ? "[?] " : "[" + c.getNumber() + "] ");
+            if (c == null) 
+            {
+                looper++;
+                continue;
+            }
+            String cardText = c.getHidden() ? "[?]" : "[" + c.getNumber() + "]";
+            String comma = (looper == botPlayer.size() - 1) ? "" : ", ";
+            System.out.print(cardText + comma);
+            looper++;
         }
         System.out.println("\n\n1: Hit (Draw)");
         System.out.println("2: Stand (Stay)");
@@ -267,7 +280,6 @@ public class Playgame
     public static void executeTrumpEffect(String effect) {
         String actorName = isUserTurn ? "You" : "Your opponent";
         String targetName = isUserTurn ? "your opponent's" : "your";
-        
         ArrayList<Card> currentPlayerList = isUserTurn ? userPlayer : botPlayer;
         ArrayList<Card> opponentPlayerList = isUserTurn ? botPlayer : userPlayer;
         ArrayList<String> currentHistory = isUserTurn ? userTrumpHistory : botTrumpHistory;
@@ -425,16 +437,79 @@ public class Playgame
             }
         }
         else if (effect.equals("Reveal")) 
-        	{
-            if (isUserTurn) 
+        {
+            ArrayList<Integer> hiddenIndices = new ArrayList<Integer>();
+            for (int i = 0; i < opponentPlayerList.size(); i++) 
             {
-                System.out.println("Opponent's first card is: " + botPlayer.get(0).getNumber());
-                opponentPlayerList.get(0).setHidden(false); 
-                System.out.println(actorName + " revealed " + targetName + " hidden card! It was a " + opponentPlayerList.get(0).getNumber());
-            } else 
+                Card c = opponentPlayerList.get(i);
+                if (c != null && c.getHidden()) 
+                {
+                    hiddenIndices.add(i);
+                }
+            }
+            if (hiddenIndices.isEmpty()) 
             {
-                System.out.println("Your opponent peeked at your hidden card (" + userPlayer.get(0).getNumber() + ")!");
-                currentPlayerList.get(0).setHidden(false); 
+                System.out.println(">> Opponent has no hidden cards!");
+            } 
+            else if (hiddenIndices.size() == 1) {
+                int targetIdx = hiddenIndices.get(0);
+                Card revealed = opponentPlayerList.get(targetIdx);
+                revealed.setHidden(false);
+                if (isUserTurn) 
+                {
+                    System.out.println("You revealed your opponent's hidden card (Card " + (targetIdx + 1) + "): " + revealed.getNumber());
+                } else 
+                {
+                    System.out.println("Your opponent peeked at your hidden card (Card " + (targetIdx + 1) + "): " + revealed.getNumber());
+                }
+            } 
+            else 
+            {
+                int chosenIdx = -1;
+                if (isUserTurn) {
+                    System.out.println("\nOpponent has hidden cards at positions:");
+                    for (int idx : hiddenIndices) 
+                    {
+                        System.out.println("  - Card " + (idx + 1));
+                    }
+                    boolean validChoice = false;
+                    while (!validChoice) 
+                    {
+                        System.out.print("Select which card to reveal (enter card number, e.g. 1 for Card 1): ");
+                        if (userIntInput.hasNextInt()) {
+                            int selectedNum = userIntInput.nextInt();
+                            userIntInput.nextLine();
+                            int mappedIndex = selectedNum - 1;
+                            if (hiddenIndices.contains(mappedIndex)) 
+                            {
+                                chosenIdx = mappedIndex;
+                                validChoice = true;
+                            } else 
+                            {
+                                System.out.println(">> Invalid selection or that card is not hidden. Try again.");
+                            }
+                        } 
+                        else 
+                        {
+                            userIntInput.nextLine();
+                            System.out.println(">> Please enter a valid number.");
+                        }
+                    }
+                } else 
+                {
+                    int randomPickIndex = (int) (Math.random() * hiddenIndices.size());
+                    chosenIdx = hiddenIndices.get(randomPickIndex);
+                }
+                Card revealed = opponentPlayerList.get(chosenIdx);
+                revealed.setHidden(false);
+                if (isUserTurn) 
+                {
+                    System.out.println("You revealed opponent's Card " + (chosenIdx + 1) + "! It was a " + revealed.getNumber() + ".");
+                } 
+                else 
+                {
+                    System.out.println("Your opponent peeked at your Card " + (chosenIdx + 1) + " (" + revealed.getNumber() + ")!");
+                }
             }
         }
         else if (effect.equals("Bless")) 
@@ -475,8 +550,7 @@ public class Playgame
                     }
                 }
                 if (bestCard != null) break;
-            }
-            
+            }        
             if (bestCard != null) 
             {
                 Deck.deck.remove(foundIndex);
