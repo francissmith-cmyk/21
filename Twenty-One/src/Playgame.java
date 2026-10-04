@@ -237,6 +237,10 @@ public class Playgame
             	{	
             	userStood = true;
             	}	
+        	 	else
+        	 	{
+        	 	botStood = false;
+        	 	}
             turnOver = true;
             }
        }
@@ -247,6 +251,10 @@ public class Playgame
         	 	{
         	 	userStood = true;
         	 	}	
+        	 	else
+        	 	{
+        	 	botStood = false;
+        	 	}
              turnOver = true;
         }
     }

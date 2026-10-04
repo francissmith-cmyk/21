@@ -8,6 +8,7 @@ public class Deck
 	public static void fillDeck()
 		{
 			deck.clear();
+			deck.add(new Card(0, false));
 			deck.add(new Card(1, false));
 			deck.add(new Card(2, false));
 			deck.add(new Card(3, false));
