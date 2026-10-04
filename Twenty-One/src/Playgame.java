@@ -125,7 +125,7 @@ public class Playgame
     boolean turnOver = false;
     while (!turnOver) 
     	{
-        System.out.println("\n--- YOUR TURN ---");
+        System.out.println("\u001B[0m" + "\n--- YOUR TURN ---");
         int botKnown = 0;
         for (Card c : botPlayer) 
         {
@@ -135,8 +135,8 @@ public class Playgame
             }
         }
         int opponentSaw = sawDistance - sawPlace;
-        System.out.println("Target: " + target + " | Your Score: " + userValue + " | Bot's Visible Score: " + botKnown);
-        System.out.println("Your Lives: " + sawPlace + " | Opponent's Lives: " + opponentSaw + " | Current Bet: " + bet + "\n");
+        System.out.println("Target: " + "\u001B[34m" + target + "\u001B[39m" + " | Your Score: " + "\u001B[32m"+ userValue + "\u001B[39m" + " | Bot's Visible Score: " + "\u001B[31m" + botKnown + "\u001B[39m");
+        System.out.println("Your Lives: " + "\u001B[32m"+ sawPlace + "\u001B[39m" + " | Opponent's Lives: " + "\u001B[31m" + opponentSaw + "\u001B[39m" + " | Current Bet: " + "\u001B[34m" + bet + "\u001B[32m" + "\u001B[39m" + "\n");
         System.out.print("Your Hand: ");
         int looper = 0;
         for (Card c : userPlayer) 
@@ -174,7 +174,7 @@ public class Playgame
             { 
                 if (userValue > target) 
                 {
-                    System.out.println("Overkill of points.");
+                    System.out.println("\u001B[31m" + "Overkill of points." + "\u001B[39m");
                 } else if (Deck.deck.isEmpty()) 
                 {
                     System.out.println("Deck is empty.");
@@ -203,8 +203,8 @@ public class Playgame
             } 
             else if (choice == 2008)
         		{
-                    System.out.println("\n--- [DEBUG MODE ACTIVE] ---");
-                    System.out.println("Bot's Actual Value: " + botValue);
+                    System.out.println("\u001B[36m" + "\n--- [DEBUG MODE ACTIVE] ---" + "\u001B[39m");
+                    System.out.println("Bot's Actual Value: " + "\u001B[31m" + botValue + "\u001B[39m");
                     System.out.print("Bot's Full Hand: ");
                     for (Card c : botPlayer) 
                     {
@@ -800,26 +800,27 @@ public class Playgame
         for (Card c : botPlayer) c.setHidden(false);
         if (userValue == botValue)
         {
-            System.out.println("It's a tie, as both players got "+ userValue+ ".");
+            System.out.println("It's a tie, as both players got "+ "\u001B[33m" + userValue+ "\u001B[39m" + ".");
             bet++;
         }
         else if (botValue > target && userValue <= target||(botValue > target && userValue > target && botValue > userValue)||(userValue <= target && botValue < userValue))
         {
             sawPlace+= bet;
             bet++;
-            System.out.println("You beat your opponent's "+ botValue+ " with your "+ userValue+ ".");
+            System.out.println("You beat your opponent's "+ "\u001B[31m" + botValue+ "\u001B[39m" + " with your "+ "\u001B[32m"+ userValue+ "\u001B[39m" + ".");
         }
         else 
         {
             sawPlace-= bet;
             bet++;
-            System.out.println("You lost to your opponent's "+ botValue+ " with your "+ userValue+ ".");
+            System.out.println("You lost to your opponent's "+ "\u001B[31m" + botValue+ "\u001B[39m" + " with your "+ "\u001B[32m" + userValue+ "\u001B[39m" + ".");
         }
         if (sawPlace <= 0)
         {
         	if (!bless)
         		{
-            System.out.println("You died!");
+            System.out.println("\u001B[1m" + "\u001B[31m" + "The saw before you moves towards your face, closing the meager remaining distance.");
+            System.out.println("All that's left to do is to reflect on your life as you face an inevitable end.");
             playingGame = false;
         		}
         	else
@@ -834,7 +835,8 @@ public class Playgame
         {
         	if (!bless)
         	{
-            System.out.println("Your opponent died!");
+            System.out.println("\u001B[1m" + "\u001B[32m" + "You win, having to watch your opponent die in front of you.");
+            System.out.println("All you can do is wonder if it was worth winning at the expense of another life.");
             playingGame = false;
         	}
         	else 
@@ -842,12 +844,13 @@ public class Playgame
         			bet--;
         			sawPlace -= bet;
         			bet--;
-        			System.out.println("Bless card active. Bet reduced by one.");
+        			System.out.println("\u001B[37m" + "Bless card active. Bet reduced by one." + "\u0001B[0m");
         		}
         }
     }
     public static void clearScreen() throws InterruptedException 
     {
+    	System.out.println("\n Reshuffling cards...");
 		Thread.sleep(3000);
         for (int i = 0; i < 60; i++)
         	{
