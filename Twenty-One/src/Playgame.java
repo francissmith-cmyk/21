@@ -253,7 +253,6 @@ public class Playgame
 }
     public static void PlayerTrump() 
     {
-    	usedTrump = true;
         if (userTrump.isEmpty()) 
         {
             System.out.println(">> You have no Trump Cards!");
@@ -275,8 +274,8 @@ public class Playgame
             {
                 TrumpCard chosenCard = userTrump.remove(listIndex);
                 PlayerTrumps--;
-                userStood = false;
                 System.out.println("You used the " + chosenCard.getFunction() + " trump.");
+                usedTrump = true;
                 executeTrumpEffect(chosenCard.getFunction());
             } 
             else 
@@ -419,7 +418,7 @@ public class Playgame
                 TrumpCard DrawnCard = TrumpDeck.deck.get((int)(Math.random() * TrumpDeck.size()));
                 userTrump.add(DrawnCard);
                 PlayerTrumps++;
-                System.out.println("You drew the "+ DrawnCard.getFunction()+ " card.");
+                System.out.println("You drew the "+ DrawnCard.getColor() + DrawnCard.getFunction()+ "\u001B[0m" + " card.");
                 botTrump.add(TrumpDeck.deck.get((int)(Math.random() * TrumpDeck.size())));
                 System.out.println("Your opponent drew a trump card.");
                 BotTrumps++;
@@ -436,8 +435,12 @@ public class Playgame
                 currentPlayerList.add(Deck.deck.remove(0));
                 int newScore = currentPlayerList.get(0).getNumber() + currentPlayerList.get(1).getNumber();
                 if (isUserTurn) userValue = newScore;
-                else botValue = newScore;
-                System.out.println(actorName + " drew a fresh hand. New total is " + newScore + ".");
+                else 
+                {
+                botPlayer.get(0).setHidden(true);
+                int num = botPlayer.get(1).getNumber();
+                System.out.println("Your opponent drew a fresh hand. New total is at least " + num + ".");
+                }
             }
             else 
             {
@@ -661,14 +664,9 @@ public class Playgame
         System.out.println("\n--- OPPONENT'S TURN ---");
         int visibleUserScore = getVisibleUserScore();
         double bustChance = getBustProbability(botValue);
-        boolean usingTrumps = true;
-        int safetyCounter = 0; 
-        while (usingTrumps && safetyCounter < 10) 
-        {
-            safetyCounter++;
             int botLives = sawDistance - sawPlace;
             int userLives = sawPlace;
-            boolean botWouldDie = (botLives <= bet);
+            boolean botWouldDie = (botLives <= bet && !bless);
             boolean highStakes = (bet >= 2 || botLives < 4);
             boolean botIsBust = (botValue > target);
             boolean botIsLosing = botIsBust || (botValue < visibleUserScore);
@@ -676,74 +674,124 @@ public class Playgame
             {
                 if (botHasTrump("Go for 24") && botValue <= 24) 
                 { 
-                    playBotTrump("Go for 24"); usedTrump = true; continue; 
+                	if(botHasTrump("Dud"))
+                	{
+                	playBotTrump("Dud");
+                	}
+                    playBotTrump("Go for 24"); usedTrump = true;
                 }
                 if (botHasTrump("Go for 27") && botValue <= 27) 
                 { 
-                    playBotTrump("Go for 27"); usedTrump = true; continue; 
+                	if(botHasTrump("Dud"))
+                	{
+                	playBotTrump("Dud");
+                	}
+                    playBotTrump("Go for 27"); usedTrump = true;
                 }
                 if (botHasTrump("Return")) 
                 { 
-                    playBotTrump("Return"); usedTrump = true; continue; 
+                    playBotTrump("Return"); usedTrump = true;
                 }
                 if (botHasTrump("Refresh")) 
                 { 
-                    playBotTrump("Refresh"); usedTrump = true; continue; 
+                    playBotTrump("Refresh"); usedTrump = true;
                 }
                 if (botHasTrump("Exchange") && visibleUserScore <= target) 
                 { 
-                    playBotTrump("Exchange"); usedTrump = true; continue; 
+                    playBotTrump("Exchange"); usedTrump = true;
                 }
             }
-
             if (highStakes) 
             {
                 if (botHasTrump("Reveal") && userPlayer.get(0).getHidden()) 
                 {
-                    playBotTrump("Reveal"); usedTrump = true; continue;
+                    playBotTrump("Reveal"); usedTrump = true;
                 }
                 if (botHasTrump("Exchange") && visibleUserScore > botValue && visibleUserScore <= target) 
                 {
-                    playBotTrump("Exchange"); usedTrump = true; continue;
+                    playBotTrump("Exchange"); usedTrump = true;
                 }
             }
-
             int gap = target - botValue;
-            if (gap >= 1 && gap <= 11 && !botStood) 
+            if (botIsLosing && highStakes && gap >= 1 && gap < 8) 
             {
                 String cardNeeded = gap + " card";
                 if (botHasTrump(cardNeeded) && Card.isCardInDeck(gap)) 
                 {
-                    playBotTrump(cardNeeded); usedTrump = true; continue;
+                    playBotTrump(cardNeeded); usedTrump = true;
                 }
-                if (botHasTrump("Perfect Draw")) {
-                    playBotTrump("Perfect Draw"); usedTrump = true; continue;
+                else if (botIsLosing && highStakes)
+                {
+                gap--;
+                cardNeeded = gap + " card";
+                	if (botHasTrump(cardNeeded) && Card.isCardInDeck(gap)) 
+                	{
+                    playBotTrump(cardNeeded); usedTrump = true;
+                	}
+                gap++;
                 }
+            if (highStakes && botIsLosing && gap <= 11 && botHasTrump("Perfect Draw")) 
+            {
+            playBotTrump("Perfect Draw"); usedTrump = true;
+            }
             }
             if (!botIsLosing && botValue >= target - 2 && highStakes) 
             {
                 if (botHasTrump("Two-up")) 
                 { 
-                    playBotTrump("Two-up"); usedTrump = true; continue; 
+                	if(botHasTrump("Dud"))
+                	{
+                	playBotTrump("Dud");
+                	}
+                    playBotTrump("Two-up"); usedTrump = true;
                 }
                 if (botHasTrump("One-up")) 
                 { 
-                    playBotTrump("One-up"); usedTrump = true; continue; 
+                	if(botHasTrump("Dud"))
+                	{
+                	playBotTrump("Dud");
+                	}
+                    playBotTrump("One-up"); usedTrump = true;
                 }
             }
             if (botWouldDie && (botIsLosing || botIsBust)) 
             {
-                if (botHasTrump("Shield+")) 
+            	boolean canFix = true;
+            	while (botWouldDie && canFix)
+            	{
+                if (botHasTrump("Bless")) 
                 { 
-                    playBotTrump("Shield+"); usedTrump = true; continue; 
+                	if(botHasTrump("Dud"))
+                	{
+                	playBotTrump("Dud");
+                	}
+                    playBotTrump("Bless"); usedTrump = true; 
+                    botWouldDie = false;
                 }
-                if (botHasTrump("Shield")) 
+                else if (botHasTrump("Shield+")) 
                 { 
-                    playBotTrump("Shield"); usedTrump = true; continue; 
+                	if(botHasTrump("Dud"))
+                	{
+                	playBotTrump("Dud");
+                	}
+                    playBotTrump("Shield+"); usedTrump = true; 
+                    botWouldDie = (botLives <= bet && !bless);
                 }
+                else if (botHasTrump("Shield")) 
+                { 
+                	if(botHasTrump("Dud"))
+                	{
+                	playBotTrump("Dud");
+                	}
+                    playBotTrump("Shield"); usedTrump = true; 
+                    botWouldDie = (botLives <= bet && !bless);
+                }
+                else 
+                {
+                canFix = false;
+                }
+            	}
             }
-            usingTrumps = false;
-        }
         boolean finalIsLosing = (botValue > target) || (botValue < visibleUserScore);
         if (finalIsLosing && bustChance < 0.65) 
         {
