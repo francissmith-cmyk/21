@@ -1,11 +1,13 @@
 public class TrumpCard {
     private String function;
 	private String explanation;
+	private String color;
 
-    public TrumpCard(String f, String e) 
+    public TrumpCard(String f, String e, String d) 
     {
         this.function = f;
         this.explanation = e;
+        this.color = d;
     }
 
     public String getFunction() 
@@ -25,5 +27,15 @@ public class TrumpCard {
     public void setExplanation(String explanation) 
     {
         this.explanation = explanation;
+    }
+    
+    public String getColor() 
+    {
+        return this.color;
+    }
+
+    public void setColor(String function) 
+    {
+        this.color = function;
     }
 }
