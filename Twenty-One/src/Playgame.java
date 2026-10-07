@@ -541,7 +541,7 @@ public class Playgame
                 revealed.setHidden(false);
                 if (isUserTurn) 
                 {
-                    System.out.println("You " + "\u001B[33m"  + "revealed" + "\u001B[0m" + "opponent's Card " + (chosenIdx + 1) + "! It was a " + revealed.getNumber() + ".");
+                    System.out.println("You " + "\u001B[33m"  + " revealed" + "\u001B[0m" + "opponent's Card " + (chosenIdx + 1) + "! It was a " + revealed.getNumber() + ".");
                 } 
                 else 
                 {
@@ -656,7 +656,7 @@ public class Playgame
         	}
         	else
         	{
-        	System.out.println("Your opponent just used a " + "\u001B[90m" + "dud " + "\u001B[90m" + "card. You can't help but wonder why.");
+        	System.out.println("Your opponent just used a " + "\u001B[90m" + "dud " + "\u001B[0m" + "card. You can't help but wonder why.");
         	}
             currentHistory.add(effect);
         }
