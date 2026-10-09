@@ -1,6 +1,5 @@
 import java.util.ArrayList;
 import java.util.Collections;
-
 public class Deck
 	{
 	static ArrayList<Card> deck = new ArrayList<Card>();

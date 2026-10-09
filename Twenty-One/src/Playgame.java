@@ -14,6 +14,7 @@ public class Playgame
     static int sawDistance = 14;
     static int userValue = 0;
     static int botValue = 0;
+    static int botTime = 0;
     static boolean userStood = false;
     static boolean botStood = false;
     static boolean isUserTurn = true;
@@ -61,10 +62,6 @@ public class Playgame
 }
     public static void Greetplayer()
     {
-    	  for (int i = 0; i < 60; i++)
-          	{
-          		System.out.println("");
-          	}
         int greeting = (int)(Math.random()*4);
         if (greeting == 0)
         {
@@ -699,6 +696,8 @@ public class Playgame
     public static void botTurn() 
     {
         System.out.println("\n--- OPPONENT'S TURN ---");
+        System.out.println("Your opponent is thinking.");
+        botTime = 0;
         int visibleUserScore;
         double estimatedUserScore;
         boolean userGuaranteedBust;
@@ -710,7 +709,7 @@ public class Playgame
         boolean botIsBust;
         boolean botIsLosing;
         boolean continueTrumpPhase = true;
-        while (continueTrumpPhase) 
+        while (continueTrumpPhase && (botTime < 6000))
         {
             usedTrump = false;
             visibleUserScore = getVisibleUserScore();
@@ -725,28 +724,33 @@ public class Playgame
             botIsLosing = botIsBust || (!userGuaranteedBust && botValue < estimatedUserScore);
             if (botIsBust && highStakes) 
             {
+                botPause(1800);
                 double probUserBustedWorse = getProbabilityUserBustedWorseThan(botValue);
                 if (probUserBustedWorse < 0.70)
                 {
                     if (botHasTrump("Go for 24") && botValue <= 24) 
                     { 
+                        botPause(100);
                         playBotTrump("Go for 24"); 
                         usedTrump = true;
-                        if (botHasTrump("Dud")) playBotTrump("Dud"); // Cover with 1 Dud
+                        if (botHasTrump("Dud")) playBotTrump("Dud");
                     }
                     else if (botHasTrump("Go for 27") && botValue <= 27) 
                     { 
+                        botPause(100);
                         playBotTrump("Go for 27"); 
                         usedTrump = true;
-                        if (botHasTrump("Dud")) playBotTrump("Dud"); // Cover with 1 Dud
+                        if (botHasTrump("Dud")) playBotTrump("Dud");
                     }
                     else if (botHasTrump("Return")) 
                     { 
+                        botPause(100);
                         playBotTrump("Return"); 
                         usedTrump = true;
                     }
                     else if (botHasTrump("Refresh")) 
                     { 
+                        botPause(100);
                         playBotTrump("Refresh"); 
                         usedTrump = true;
                     }
@@ -757,6 +761,7 @@ public class Playgame
                         boolean userLastIsLowerOrHidden = userLastCard.getHidden() || (userLastCard.getNumber() < botLastCard.getNumber());
                         if (userLastIsLowerOrHidden)
                         {
+                            botPause(100);
                             playBotTrump("Exchange"); 
                             usedTrump = true;
                         }
@@ -765,6 +770,7 @@ public class Playgame
             }
             if (!usedTrump && highStakes) 
             {
+                botPause(500);
                 if (botHasTrump("Reveal") && userPlayer.get(0).getHidden()) 
                 {
                     playBotTrump("Reveal"); 
@@ -779,6 +785,7 @@ public class Playgame
             int gap = target - botValue;
             if (!usedTrump && botIsLosing && highStakes && gap >= 1 && gap < 8) 
             {
+                botPause(800);
                 String cardNeeded = gap + " card";
                 if (botHasTrump(cardNeeded) && Card.isCardInDeck(gap)) 
                 {
@@ -797,6 +804,7 @@ public class Playgame
             }
             if (!usedTrump && botIsLosing && bustChance >= 0.50 && gap >= 1 && gap <= 8 && Card.isCardInDeck(gap) && botHasTrump("Perfect Draw")) 
             {
+                botPause(100);
                 playBotTrump("Perfect Draw"); 
                 usedTrump = true;
             }
@@ -806,6 +814,7 @@ public class Playgame
                 {
                     if (botHasTrump("Two-up")) 
                     { 
+                        botPause(100);
                         playBotTrump("Two-up"); 
                         usedTrump = true;
                         if (botHasTrump("Dud")) playBotTrump("Dud");
@@ -815,6 +824,7 @@ public class Playgame
                 {
                     if (botHasTrump("One-up")) 
                     { 
+                        botPause(100);
                         playBotTrump("One-up"); 
                         usedTrump = true;
                         if (botHasTrump("Dud")) playBotTrump("Dud");
@@ -823,6 +833,7 @@ public class Playgame
             }
             if (!usedTrump && botWouldDie && (botIsLosing || botIsBust)) 
             {
+                botPause(300);
                 if (botHasTrump("Bless")) 
                 { 
                     playBotTrump("Bless"); 
@@ -834,15 +845,17 @@ public class Playgame
                 }
                 else if (botHasTrump("Shield+")) 
                 { 
+                    botPause(100);
                     playBotTrump("Shield+"); 
                     usedTrump = true;
-                    if (botHasTrump("Dud")) playBotTrump("Dud"); // Cover with 1 Dud
+                    if (botHasTrump("Dud")) playBotTrump("Dud");
                 }
                 else if (botHasTrump("Shield")) 
                 { 
+                    botPause(100);
                     playBotTrump("Shield"); 
                     usedTrump = true;
-                    if (botHasTrump("Dud")) playBotTrump("Dud"); // Cover with 1 Dud
+                    if (botHasTrump("Dud")) playBotTrump("Dud");
                 }
             }
             if (!usedTrump) 
@@ -872,6 +885,7 @@ public class Playgame
     }
     private static void botActionDraw() 
     {
+    	botPause(1600);
         if (Deck.deck.isEmpty()) 
         {
         	if (!usedTrump)
@@ -889,7 +903,7 @@ public class Playgame
             Card drawn = Deck.deck.remove(0);
             botPlayer.add(drawn);
             botValue += drawn.getNumber();
-            System.out.println("Opponent drew a card.");
+            System.out.println("Your opponent drew a card.");
             botStood = false;
             userStood = false;
         }
@@ -1068,6 +1082,18 @@ public class Playgame
         }
         return totalCombinations == 0 ? 0.0 : ((double) worseBustCombinations / totalCombinations);
     }
+    public static void botPause(int millis) 
+    {
+        try 
+        {
+       
+        Thread.sleep(millis);
+        } 
+        catch (InterruptedException e) 
+        {
+            Thread.currentThread().interrupt();
+        }
+    }
     public static void getWinner()
     {
     	for (Card c : userPlayer) c.setHidden(false);
@@ -1136,15 +1162,16 @@ public class Playgame
     }
     public static void clearScreen() throws InterruptedException 
     {
-    	if (playingGame)
+    	for (int i = 0; i < 60; i++) 
     	{
-    	System.out.println("\n Reshuffling cards...");
-		Thread.sleep(3000);
-        for (int i = 0; i < 60; i++)
-        	{
-        		System.out.println("");
-        	}
-        System.out.flush();
+    	    System.out.println();
     	}
+       // if (playingGame)
+       // {
+       //     System.out.println("\n Reshuffling cards...");
+       //     Thread.sleep(3000);
+       //     System.out.print("\u001B[H\u001B[2J");
+       //     System.out.flush();
+       // }
     }
 }
