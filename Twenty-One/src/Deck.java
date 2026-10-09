@@ -3,7 +3,6 @@ import java.util.Collections;
 public class Deck
 	{
 	static ArrayList<Card> deck = new ArrayList<Card>();
-	
 	public static void fillDeck()
 		{
 			deck.clear();
