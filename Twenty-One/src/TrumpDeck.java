@@ -32,7 +32,7 @@ public class TrumpDeck
 			deck.add(new TrumpCard ("Shield+", "Decreases bet by 2.","\u001B[94m"));
 			deck.add(new TrumpCard ("Bloodshed", "Increases bet by one and gives you one trump card.","\u001B[91m"));
 			deck.add(new TrumpCard ("One-up", "Increases bet by 1.","\u001B[31m"));
-			deck.add(new TrumpCard ("Two-up", "Increases bet by 2.","\u001B[91m"));
+			deck.add(new TrumpCard ("Shield", "Decreases bet by 1.","\u001B[34m"));
 			deck.add(new TrumpCard ("Bless", "Nobody will die on this round. If someone would have, the bet is decreased by 1.","\u001B[96m"));
 			// Force-draw Cards
 			deck.add(new TrumpCard ("2 Card", "Gives you the two card if it is in the deck.","\u001B[32m"));
