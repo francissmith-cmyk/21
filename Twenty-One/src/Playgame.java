@@ -271,42 +271,87 @@ public class Playgame
             }
         }
     }
-    public static void PlayerTrump() 
+    public static void PlayerTrump()
     {
         System.out.println("Remember: You can use as many trumps as you like before you choose to hit or stand.");
-        if (userTrump.isEmpty()) 
+        if (userTrump.isEmpty())
         {
             System.out.println(">> You have no Trump Cards!");
             return;
         }
-        System.out.println("\n--- TRUMP CARDS ---");
-        System.out.println("1) Cancel / Back");
-        for (int i = 0; i < userTrump.size(); i++) 
-        {
-            System.out.println(userTrump.get(i).getColor() + (i + 2) + ") " + userTrump.get(i).getFunction() + " (" + userTrump.get(i).getExplanation() + ")" + "\u001B[0m");
+        String[][] categories = {
+            {"GO FOR CARDS", "Go for 17", "Go for 24", "Go for 27"},
+            {"HAND MANIPULATION CARDS", "Remove", "Return", "Exchange", "Reincarnation", "Refresh", "Disservice", "Reveal"},
+            {"BET MANIPULATION CARDS", "One-up", "Two-up", "Shield", "Shield+", "Bloodshed", "Bless"},
+            {"FORCE-DRAW CARDS", "2 Card", "3 Card", "4 Card", "5 Card", "6 Card", "7 Card", "Perfect Draw"},
+            {"TIMER MANIPULATION CARDS", "Extend", "Rush"},
+            {"MISCELLANEOUS CARDS", "Friendship", "Destroy", "Hush", "Clairvoyance", "Dud"}
+        };
+        java.util.Map<String, Integer> counts = new java.util.LinkedHashMap<>();
+        java.util.Map<String, TrumpCard> cardMap = new java.util.HashMap<>();
+        for (TrumpCard tc : userTrump) {
+            counts.put(tc.getFunction(), counts.getOrDefault(tc.getFunction(), 0) + 1);
+            if (!cardMap.containsKey(tc.getFunction())) {
+                cardMap.put(tc.getFunction(), tc);
+            }
         }
+        System.out.println("\n\u001B[1m--- TRUMP CARDS ---\u001B[0m");
+        System.out.println("0) Cancel / Back");
+        ArrayList<String> displayMenuNames = new ArrayList<>();
+        int menuOptionNumber = 1;
+        for (String[] cat : categories) {
+            String catName = cat[0];
+            boolean headerPrinted = false;
+            for (int i = 1; i < cat.length; i++) {
+                String cardName = cat[i];
+                if (counts.containsKey(cardName) && counts.get(cardName) > 0) {
+                    if (!headerPrinted) 
+                    {
+                        System.out.println("\n\u001B[1m-- " + catName + " --\u001B[0m");
+                        headerPrinted = true;
+                    }
+                    int qty = counts.get(cardName);
+                    String qtyTag = (qty > 1) ? " (x" + qty + ")" : "";
+                    TrumpCard sample = cardMap.get(cardName);
 
+                    System.out.println(sample.getColor() + menuOptionNumber + ") " 
+                            + sample.getFunction() + qtyTag + " (" + sample.getExplanation() + ")\u001B[0m");
+
+                    displayMenuNames.add(cardName);
+                    menuOptionNumber++;
+                }
+            }
+        }
         int choice = getTimedChoice(currentEndTime, "Select a card to use");
-        if (choice == 1) 
+        if (choice == 0)
         {
             System.out.println(">> Action cancelled.");
             return;
         }
-
-        int listIndex = choice - 2; 
-        if (listIndex >= 0 && listIndex < userTrump.size()) 
+        int selectedIdx = choice - 1;
+        if (selectedIdx >= 0 && selectedIdx < displayMenuNames.size())
         {
-            TrumpCard chosenCard = userTrump.remove(listIndex);
-            PlayerTrumps--;
-            System.out.println("You used the " + chosenCard.getFunction() + " trump.");
-            usedTrump = true;
-            executeTrumpEffect(chosenCard.getFunction());
-        } 
-        else if (choice == -2 && !userTime) 
+            String chosenFunctionName = displayMenuNames.get(selectedIdx);
+            TrumpCard chosenCard = null;
+            for (int i = 0; i < userTrump.size(); i++) {
+                if (userTrump.get(i).getFunction().equals(chosenFunctionName)) {
+                    chosenCard = userTrump.remove(i);
+                    break;
+                }
+            }
+            if (chosenCard != null) 
+            {
+                PlayerTrumps--;
+                System.out.println("You used the " + chosenCard.getFunction() + " trump.");
+                usedTrump = true;
+                executeTrumpEffect(chosenCard.getFunction());
+            }
+        }
+        else if (choice == -2 && !userTime)
         {
             System.out.println("\n\u001B[31mGood luck, loser.\u001B[0m");
         }
-        else 
+        else
         {
             System.out.println(">> Invalid selection.");
         }
@@ -359,7 +404,6 @@ public class Playgame
         userTime = false;
         return -2;
     }
-
     public static long runDebugMenu(long initialRemainingMillis)
     {
         long remainingMillis = initialRemainingMillis;
@@ -677,6 +721,7 @@ public class Playgame
                 new TrumpCard("Friendship", "Gives both players two trump cards.", "\u001B[95m"),
                 new TrumpCard("Destroy", "Removes opponent's last trump.", "\u001B[36m"),
                 new TrumpCard("Hush", "Draw a card your opponent cannot see.", "\u001B[36m"),
+                new TrumpCard("Clairvoyance", "Peeks at the top 3 cards remaining in the deck.", "\u001B[36m"),
                 new TrumpCard("Dud", "This Trump Card does literally nothing. Sorry!", "\u001B[90m"),
             };
             System.out.println("\n--- AVAILABLE TRUMP CARDS ---");
@@ -889,12 +934,12 @@ public class Playgame
     }
     public static void executeTrumpEffect(String effect) 
     {
-        String actorName = isUserTurn ? "You" : "Your opponent";
-        String targetName = isUserTurn ? "your opponent's" : "your";
+        String actorName = isUserTurn ? "\u001B[32mYou\u001B[0m" : "\u001B[31mYour opponent\u001B[0m";
+        String targetName = isUserTurn ? "\u001B[31myour opponent's\u001B[0m" : "\u001B[32myour\u001B[0m";
         ArrayList<Card> currentPlayerList = isUserTurn ? userPlayer : botPlayer;
         ArrayList<Card> opponentPlayerList = isUserTurn ? botPlayer : userPlayer;
         ArrayList<String> currentHistory = isUserTurn ? userTrumpHistory : botTrumpHistory;
-        System.out.println(actorName + " played: " + effect);
+        if (!isUserTurn) System.out.println(actorName + " played: " + effect);
         if (effect.startsWith("Go for")) 
         {
             userTrumpHistory.removeIf(e -> e.contains("Go for"));
@@ -985,7 +1030,7 @@ public class Playgame
             if (isUserTurn) 
             	{
             	userValue += drawnCard.getNumber();
-            	System.out.println("You drew the "+ drawnCard.getNumber()+ "card. Your opponent cannot see it.");
+            	System.out.println(actorName + " drew the "+ drawnCard.getNumber()+ " card. \u001B[31mYour opponent\u001b[0m cannot see it.");
             	}
             else
             	{
@@ -1158,6 +1203,30 @@ public class Playgame
                 {
                     System.out.println("Your opponent peeked at your Card " + (chosenIdx + 1) + " (" + revealed.getNumber() + ")!");
                 }
+            }
+        }
+        else if (effect.equals("Clairvoyance"))
+        {
+            if (isUserTurn)
+            {
+                int count = Math.min(3, Deck.deck.size());
+                if (count == 0)
+                {
+                    System.out.println("The deck is completely empty!");
+                }
+                else
+                {
+                    System.out.print("The next " + count + " card(s) in the deck: ");
+                    for (int i = 0; i < count; i++)
+                    {
+                        String comma = (i == count - 1) ? "" : ", ";
+                        System.out.print("[" + "\u001B[36m" + Deck.deck.get(i).getDisplay() + "\u001B[0m]" + comma);
+                    }
+                }
+            }
+            else
+            {
+                System.out.println(actorName + " used \u001B[36mClairvoyance\u001B[0m to peek at the deck's upcoming cards!");
             }
         }
         else if (effect.equals("Bless")) 
@@ -1363,7 +1432,7 @@ public class Playgame
             }
             if (timeLeft <= 10000 && !warned10)
             {
-                System.out.println("\n\u001B[31mYou hear the voice say 'Hurry up', and feel relieved it's not about you this time.\u001B[0m");
+                System.out.println("\n\u001B[31mYou hear the voice say 'Hurry up', and feel relieved it's not talking to this time.\u001B[0m");
                 System.out.println();
                 warned10 = true;
             }
@@ -1428,6 +1497,30 @@ public class Playgame
                             if (!isHurrying) botPause(100);
                             playBotTrump("Exchange"); 
                             usedTrump = true;
+                        }
+                    }
+                }
+            }
+            if (!usedTrump && botHasTrump("Clairvoyance") && !Deck.deck.isEmpty())
+            {
+                Card topCard = Deck.deck.get(0);
+                int nextScore = botValue + topCard.getNumber();
+                if (botIsLosing || (nextScore <= target && nextScore > botValue) || botValue >= target - 5)
+                {
+                    if (!isHurrying) botPause(300);
+                    playBotTrump("Clairvoyance");
+                    usedTrump = true;
+                    if (nextScore > target)
+                    {
+                        if (botHasTrump("Refresh"))
+                        {
+                            if (!isHurrying) botPause(200);
+                            playBotTrump("Refresh");
+                        }
+                        else if (botHasTrump("Return") && botPlayer.size() > 1)
+                        {
+                            if (!isHurrying) botPause(200);
+                            playBotTrump("Return");
                         }
                     }
                 }
@@ -1534,19 +1627,35 @@ public class Playgame
         userGuaranteedBust = isUserGuaranteedBust(visibleUserScore);
         bustChance = getBustProbability(botValue);
         boolean finalIsLosing = (botValue > target) || (!userGuaranteedBust && botValue < estimatedUserScore);
-
-        if (finalIsLosing && bustChance < 0.65) 
+        boolean usedClairvoyanceThisTurn = botTrumpHistory.contains("Clairvoyance");
+        if (usedClairvoyanceThisTurn && !Deck.deck.isEmpty())
         {
-            botActionDraw();
-        } 
-        else if (bustChance < 0.18) 
+            Card nextCard = Deck.deck.get(0);
+            if (botValue + nextCard.getNumber() <= target)
+            {
+                botActionDraw();
+            }
+            else
+            {
+                botStood = true;
+                System.out.println("Your opponent decided to stay.");
+            }
+        }
+        else
         {
-            botActionDraw();
-        } 
-        else 
-        {
-            botStood = true;
-            System.out.println("Your opponent decided to stay.");
+            if (finalIsLosing && bustChance < 0.65)
+            {
+                botActionDraw();
+            }
+            else if (bustChance < 0.18)
+            {
+                botActionDraw();
+            }
+            else
+            {
+                botStood = true;
+                System.out.println("Your opponent decided to stay.");
+            }
         }
     }
     private static void botActionDraw() 

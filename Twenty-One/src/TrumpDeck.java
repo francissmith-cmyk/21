@@ -61,6 +61,7 @@ public class TrumpDeck
 			deck.add(new TrumpCard ("Hush", "Draw a card your opponent cannot see.","\u001B[36m"));
 			deck.add(new TrumpCard ("Hush", "Draw a card your opponent cannot see.","\u001B[36m"));
 			deck.add(new TrumpCard ("Hush", "Draw a card your opponent cannot see.","\u001B[36m"));
+			deck.add(new TrumpCard("Clairvoyance", "Peeks at the top 3 cards remaining in the deck.", "\u001B[96m"));
 			deck.add(new TrumpCard ("Dud", "This Trump Card does literally nothing. Sorry!","\u001B[90m"));
 			deck.add(new TrumpCard ("Dud", "This Trump Card does literally nothing. Sorry!","\u001B[90m"));
 			deck.add(new TrumpCard ("Dud", "This Trump Card does literally nothing. Sorry!","\u001B[90m"));
