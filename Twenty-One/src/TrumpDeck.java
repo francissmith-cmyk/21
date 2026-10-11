@@ -61,6 +61,9 @@ public class TrumpDeck
 			deck.add(new TrumpCard ("Dud", "This Trump Card does literally nothing. Sorry!","\u001B[90m"));
 			deck.add(new TrumpCard ("Dud", "This Trump Card does literally nothing. Sorry!","\u001B[90m"));
 			deck.add(new TrumpCard ("Dud", "This Trump Card does literally nothing. Sorry!","\u001B[90m"));
+			// (TBA) Timer Manipulation Cards
+			// deck.add(new TrumpCard ("Extend", "Add 15 seconds to your move timer","\u001B[96m"));
+			// deck.add(new TrumpCard ("Rush", "Subtract 10 seconds from your opponent's move timer","\u001B[93m"));
 		}
 	public static void shuffle()
 		{
