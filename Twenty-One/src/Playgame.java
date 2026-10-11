@@ -364,7 +364,8 @@ public class Playgame
             System.out.println("1) View Game State");
             System.out.println("2) Give any Card from the Deck or Remove Cards from either hand/Hide, or Reveal any Card in Either Hand");
             System.out.println("3) Give or Remove Trump Cards from Either Hand");
-            System.out.println("4) Edit Turn Timer (1 - 59s)");
+            System.out.println("4) Bet, saw, and target modifier");
+            System.out.println("5) Edit Turn Timer (1 - 59s)");
             System.out.print("Select an option: ");
             if (!userIntInput.hasNextInt()) {
                 userIntInput.nextLine();
@@ -384,6 +385,9 @@ public class Playgame
                     manageTrumpCards();
                     break;
                 case 4:
+                    manageBetAndSaw();
+                    break;    
+                case 5:
                     remainingMillis = editTimer();
                     break;
                 case 0:
@@ -734,6 +738,106 @@ public class Playgame
             } else {
                 userIntInput.nextLine();
             }
+        }
+    }
+    private static void manageBetAndSaw()
+    {
+        System.out.println("\n--- BET & SAW MODIFIER ---");
+        System.out.println("1) Change Current Bet (Current: " + bet + ")");
+        System.out.println("2) Move Saw Position (Current: " + sawPlace + " / Max: " + sawDistance + ")");
+        System.out.println("3) Change Saw Total Distance (Current: " + sawDistance + ")");
+        System.out.println("4) Toggle \u001B[96mBless\u001B[0m Effect (Currently: " + (bless ? "\u001B[32mON\u001B[0m" : "\u001B[31mOFF\u001B[0m") + ")");
+        System.out.println("5) Change the Target");
+        System.out.print("Choice: ");
+        if (!userIntInput.hasNextInt()) 
+        {
+            userIntInput.nextLine();
+            return;
+        }
+        int subChoice = userIntInput.nextInt();
+        userIntInput.nextLine();
+        switch (subChoice)
+        {
+        case 1:
+            System.out.print("Enter new bet amount: ");
+            if (userIntInput.hasNextInt()) 
+            {
+                int newBet = userIntInput.nextInt();
+                userIntInput.nextLine();
+                if (newBet >= 0)
+                {
+                    bet = newBet;
+                    System.out.println("Bet updated to: " + bet);
+                }
+                else 
+                {
+                    System.out.println("\u001B[31mBet must be 0 or higher.\u001B[0m");
+                    manageBetAndSaw();
+                }
+            } 
+            else 
+            {
+                userIntInput.nextLine();
+                System.out.println("\u001B[31mInvalid input.\u001B[0m");
+                manageBetAndSaw();
+            }
+            break;
+            case 2:
+                System.out.print("Enter new saw position (0 to " + sawDistance + "): ");
+                if (userIntInput.hasNextInt()) 
+                {
+                    int newPos = userIntInput.nextInt();
+                    userIntInput.nextLine();
+                        sawPlace = newPos;
+                        if (sawPlace < 0) sawPlace = 0;
+                        if (sawPlace > sawDistance) sawPlace = sawDistance;
+                        System.out.println("Saw position updated to: " + sawPlace);
+                        System.out.println("\u001B[32mYou\u001B[0m are " + sawPlace + " spaces from death.");
+                        int opponentSaw = sawDistance - sawPlace;
+                        System.out.println("\u001B[31mYour opponent\u001B[0m is " + opponentSaw + " spaces from death.");
+                } 
+                else 
+                {
+                    userIntInput.nextLine();
+                    System.out.println("\u001B[31mInvalid input.\u001B[0m");
+                }
+                break;
+            case 3:
+                System.out.print("Enter new total saw distance: ");
+                if (userIntInput.hasNextInt()) 
+                {
+                    int newDist = userIntInput.nextInt();
+                    userIntInput.nextLine();
+                    if (newDist > 2) 
+                    {
+                        sawDistance = newDist;
+                        if (sawPlace > sawDistance) sawPlace = sawDistance;
+                        System.out.println("Saw distance updated to: " + sawDistance);
+                        System.out.println("\u001B[32mYou\u001B[0m are " + sawPlace + " spaces from death.");
+                        int opponentSaw = sawDistance - sawPlace;
+                        System.out.println("\u001B[31mYour opponent\u001B[0m is " + opponentSaw + " spaces from death.");
+                    } 
+                    else 
+                    {
+                        System.out.println("\u001B[31mDistance must be greater than 2.\u001B[0m");
+                    }
+                } else 
+                {
+                    userIntInput.nextLine();
+                    System.out.println("\u001B[31mInvalid input.\u001B[0m");
+                }
+                break;
+            case 4:
+                bless = !bless;
+                System.out.println("Bless status toggled to: " + (bless ? "\u001B[96mACTIVE\u001B[0m" : "\u001B[90mINACTIVE\u001B[0m"));
+                break;
+            case 5:
+            	System.out.print("Enter new target score (0 to 66): ");
+            	int newTarget = userIntInput.nextInt();
+            	if (newTarget >= 0 && newTarget <= 66) target = newTarget;
+            	else System.out.println("\u001B[31mInvalid target.\u001B[0m");
+            default:
+                System.out.println("\u001B[31mInvalid choice.\u001B[0m");
         }
     }
     private static long editTimer()
