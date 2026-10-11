@@ -9,12 +9,14 @@ public class Playgame
     static ArrayList <TrumpCard> userTrump = new ArrayList<TrumpCard>();
     static ArrayList <TrumpCard> botTrump = new ArrayList<TrumpCard>();
     static boolean playingGame = false;
+    static long currentEndTime = 0;
     static int bet = 1;
     static int sawPlace = 7;
     static int sawDistance = 14;
     static int userValue = 0;
     static int botValue = 0;
-    static int botTime = 0;
+    static int moveTimer = 30000;
+    static final int defaultMoveTimer = 30000;
     static boolean userTime = true;
     static boolean userStood = false;
     static boolean botStood = false;
@@ -86,7 +88,6 @@ public class Playgame
         }
         playingGame = true;
     }
-
     public static void dealCard()
     {    
     	target = 21;
@@ -124,13 +125,15 @@ public class Playgame
         userTrumpHistory.clear();
         botTrumpHistory.clear();
         bless = false;
+        moveTimer = defaultMoveTimer;
     }
     public static void userTurn() 
     {
+    	currentEndTime = System.currentTimeMillis() + moveTimer;
+    	moveTimer = defaultMoveTimer;
         boolean turnOver = false;
         usedTrump = false;
         userTime = true;
-        long turnEndTime = System.currentTimeMillis() + 30000;
         while (!turnOver) 
         {
             System.out.println("\u001B[0m" + "\n--- YOUR TURN ---");
@@ -146,7 +149,7 @@ public class Playgame
             String displayUserScore = (userValue > 99) ? "\u001B[31mOverkill\u001B[39m" : "\u001B[32m" + userValue + "\u001B[39m";
             String displayBotScore = (botKnown > 99) ? "\u001B[31mOverkill\u001B[39m" : "\u001B[31m" + botKnown + "\u001B[39m";
             System.out.println("Target: " + "\u001B[34m" + target + "\u001B[39m" + " | Your Score: " + displayUserScore + " | Bot's Visible Score: " + displayBotScore);
-            System.out.println("Your Lives: " + "\u001B[32m"+ sawPlace + "\u001B[39m" + " | Opponent's Lives: " + "\u001B[31m" + opponentSaw + "\u001B[39m" + " | Current Bet: " + "\u001B[34m" + bet + "\u001B[32m" + "\u001B[39m" + "\n");            
+            System.out.println("Your Lives: " + "\u001B[32m" + sawPlace + "\u001B[39m" + " | Opponent's Lives: " + "\u001B[31m" + opponentSaw + "\u001B[39m" + " | Current Bet: " + "\u001B[34m" + bet + "\u001B[39m" + "\n");            
             
             if (bless) 
             {
@@ -155,7 +158,8 @@ public class Playgame
             System.out.print("Your Hand: ");
             int looper = 0;
             for (Card c : userPlayer) {
-                if (c != null) {
+                if (c != null) 
+                {
                     String hiddenTag = c.getHidden() ? " (Hidden)" : "";
                     String comma = (looper == userPlayer.size() - 1) ? "" : ", ";
                     String cardStr = (c.getNumber() >= 100) ? "\u001B[31mL\u001B[0m" : String.valueOf(c.getNumber());
@@ -181,8 +185,8 @@ public class Playgame
             System.out.println("\n\n1: Hit (Draw)");
             System.out.println("2: Stand (Stay)");
             System.out.println("3: View Trump Cards");
-            int choice = getTimedChoice(turnEndTime, "Select an option");
-            
+
+            int choice = getTimedChoice(currentEndTime, "Select an option");
             if (choice == 1) 
             { 
                 if (userValue > target) 
@@ -227,12 +231,15 @@ public class Playgame
             }
             else if (choice == 3) 
             {
-                PlayerTrump(turnEndTime); 
+                PlayerTrump(); 
             } 
             else if (choice == 2008) 
             {
-             turnEndTime = runDebugMenu(turnEndTime);
-             continue;
+                long remainingMillis = currentEndTime - System.currentTimeMillis();
+                if (remainingMillis < 0) remainingMillis = 0;
+                remainingMillis = runDebugMenu(remainingMillis);
+                currentEndTime = System.currentTimeMillis() + remainingMillis;
+                continue; 
             }
             else if (choice == -2 && !userTime) 
             {
@@ -246,7 +253,7 @@ public class Playgame
                     userPlayer.add(new Card(100, false));
                     userValue += 100;
                 }
-                int text = (int)(Math.random()*2);
+                int text = (int)(Math.random() * 2);
                 if (text == 0)
                 {
                     System.out.println("\u001B[31mGood luck, loser.\u001B[0m");
@@ -264,7 +271,7 @@ public class Playgame
             }
         }
     }
-    public static void PlayerTrump(long turnEndTime) 
+    public static void PlayerTrump() 
     {
         System.out.println("Remember: You can use as many trumps as you like before you choose to hit or stand.");
         if (userTrump.isEmpty()) 
@@ -278,12 +285,14 @@ public class Playgame
         {
             System.out.println(userTrump.get(i).getColor() + (i + 2) + ") " + userTrump.get(i).getFunction() + " (" + userTrump.get(i).getExplanation() + ")" + "\u001B[0m");
         }
-        int choice = getTimedChoice(turnEndTime, "Select a card to use");
+
+        int choice = getTimedChoice(currentEndTime, "Select a card to use");
         if (choice == 1) 
         {
             System.out.println(">> Action cancelled.");
             return;
         }
+
         int listIndex = choice - 2; 
         if (listIndex >= 0 && listIndex < userTrump.size()) 
         {
@@ -317,14 +326,13 @@ public class Playgame
                     if (i == 0)
                     {
                         message = "Hurry up!";
-                        System.out.println("\n\u001B[31m" + message + "\u001B[0m");
-                        System.out.print(promptMsg + ": ");
                     }
                     else
                     {
                         message = "Make your choice or lose.";    
-                        System.out.println("\n\u001B[31m" + message + "\u001B[0m");
                     }
+                    System.out.println("\n\u001B[31m" + message + "\u001B[0m");
+                    System.out.print(promptMsg + ": ");
                     warned10 = true;
                 }
                 if (System.in.available() > 0) 
@@ -351,11 +359,10 @@ public class Playgame
         userTime = false;
         return -2;
     }
-    public static long runDebugMenu(long currentEndTime)
-    {
-        long remainingMillis = currentEndTime - System.currentTimeMillis();
-        if (remainingMillis < 0) remainingMillis = 0;
 
+    public static long runDebugMenu(long initialRemainingMillis)
+    {
+        long remainingMillis = initialRemainingMillis;
         boolean inDebug = true;
         while (inDebug)
         {
@@ -364,8 +371,8 @@ public class Playgame
             System.out.println("1) View Game State");
             System.out.println("2) Give any Card from the Deck or Remove Cards from either hand/Hide, or Reveal any Card in Either Hand");
             System.out.println("3) Give or Remove Trump Cards from Either Hand");
-            System.out.println("4) Bet, saw, and target modifier");
-            System.out.println("5) Edit Turn Timer (1 - 59s)");
+            System.out.println("4) Bet, Saw, and Target Modifier");
+            System.out.println("5) Edit Turn Timer");
             System.out.print("Select an option: ");
             if (!userIntInput.hasNextInt()) {
                 userIntInput.nextLine();
@@ -375,9 +382,9 @@ public class Playgame
             userIntInput.nextLine();
             switch (dbgChoice)
             {
-            case 1:
-                printDebugState(remainingMillis);
-                break;
+                case 1:
+                    printDebugState(remainingMillis);
+                    break;
                 case 2:
                     managePlayerCards();
                     break;
@@ -387,8 +394,8 @@ public class Playgame
                 case 4:
                     manageBetAndSaw();
                     break;    
-                case 5:
-                    remainingMillis = editTimer();
+                case 5: 
+                    remainingMillis = editTimer(remainingMillis);
                     break;
                 case 0:
                     inDebug = false;
@@ -397,7 +404,7 @@ public class Playgame
                     System.out.println("\u001B[31mInvalid debug option.\u001B[0m");
             }
         }
-        return System.currentTimeMillis() + remainingMillis;
+        return remainingMillis;
     }
     private static void printDebugState(long remainingMillis)
     {
@@ -571,7 +578,7 @@ public class Playgame
         }
         else if (action == 4)
         {
-        	System.out.print("Target (\u001B[31m0 = Bot\u001B[0m, \u001B[32m1 = User\u001B[0m): ");
+            System.out.print("Target (\u001B[31m0 = Bot\u001B[0m, \u001B[32m1 = User\u001B[0m): ");
             if (!userIntInput.hasNextInt()) 
             {
                 userIntInput.nextLine();
@@ -639,37 +646,38 @@ public class Playgame
         }
         String targetName = (targetPlayer == 1) ? "User" : "Bot";
         ArrayList<TrumpCard> trumps = (targetPlayer == 1) ? userTrump : botTrump;
-
         if (action == 1)
         {
             TrumpCard[] catalog = new TrumpCard[] {
-                new TrumpCard("Go for 17", "", "\u001B[35m"),
-                new TrumpCard("Go for 24", "", "\u001B[35m"),
-                new TrumpCard("Go for 27", "", "\u001B[35m"),
-                new TrumpCard("Remove", "", "\u001B[33m"),
-                new TrumpCard("Return", "", "\u001B[33m"),
-                new TrumpCard("Exchange", "", "\u001B[33m"),
-                new TrumpCard("Reincarnation", "", "\u001B[93m"),
-                new TrumpCard("Refresh", "", "\u001B[33m"),
-                new TrumpCard("Disservice", "", "\u001B[93m"),
-                new TrumpCard("Reveal", "", "\u001B[33m"),
-                new TrumpCard("One-up", "", "\u001B[31m"),
-                new TrumpCard("Two-up", "", "\u001B[91m"),
-                new TrumpCard("Shield", "", "\u001B[34m"),
-                new TrumpCard("Shield+", "", "\u001B[94m"),
-                new TrumpCard("Bloodshed", "", "\u001B[91m"),
-                new TrumpCard("Bless", "", "\u001B[96m"),
-                new TrumpCard("2 Card", "", "\u001B[32m"),
-                new TrumpCard("3 Card", "", "\u001B[32m"),
-                new TrumpCard("4 Card", "", "\u001B[32m"),
-                new TrumpCard("5 Card", "", "\u001B[32m"),
-                new TrumpCard("6 Card", "", "\u001B[32m"),
-                new TrumpCard("7 Card", "", "\u001B[32m"),
-                new TrumpCard("Perfect Draw", "", "\u001B[92m"),
-                new TrumpCard("Friendship", "", "\u001B[95m"),
-                new TrumpCard("Destroy", "", "\u001B[36m"),
-                new TrumpCard("Hush", "", "\u001B[36m"),
-                new TrumpCard("Dud", "", "\u001B[90m")
+                new TrumpCard("Go for 17", "Change target to 17", "\u001B[35m"),
+                new TrumpCard("Go for 24", "Change target to 24", "\u001B[35m"),
+                new TrumpCard("Go for 27", "Change target to 27", "\u001B[35m"),
+                new TrumpCard("Remove", "Removes the last card in your opponent's hand, but it cannot be their first (hidden) card.", "\u001B[33m"),
+                new TrumpCard("Return", "Removes the last card in your hand. Cannot be your first card.", "\u001B[33m"),
+                new TrumpCard("Exchange", "Switch out your last card with your opponent's last card.", "\u001B[33m"),
+                new TrumpCard("Reincarnation", "Removes opponent's last trump + gives you one trump.", "\u001B[93m"),
+                new TrumpCard("Refresh", "Removes all of your cards, gives you two fresh ones.", "\u001B[33m"),
+                new TrumpCard("Disservice", "Forces your opponent to draw a random card.", "\u001B[93m"),
+                new TrumpCard("Reveal", "Tells you your opponent's first card.", "\u001B[33m"),
+                new TrumpCard("One-up", "Increases bet by 1.", "\u001B[31m"),
+                new TrumpCard("Two-up", "Increases bet by 2.", "\u001B[91m"),
+                new TrumpCard("Shield", "Decreases bet by 1.", "\u001B[34m"),
+                new TrumpCard("Shield+", "Decreases bet by 2.", "\u001B[94m"),
+                new TrumpCard("Bloodshed", "Increases bet by one and gives you one trump card.", "\u001B[91m"),
+                new TrumpCard("Bless", "Nobody will die on this round. If someone would have, the bet is decreased by 1.", "\u001B[96m"),
+                new TrumpCard("2 Card", "Gives you the two card if it is in the deck.", "\u001B[32m"),
+                new TrumpCard("3 Card", "Gives you the three card if it is in the deck.", "\u001B[32m"),
+                new TrumpCard("4 Card", "Gives you the four card if it is in the deck.", "\u001B[32m"),
+                new TrumpCard("5 Card", "Gives you the five card if it is in the deck.", "\u001B[32m"),
+                new TrumpCard("6 Card", "Gives you the six card if it is in the deck.", "\u001B[32m"),
+                new TrumpCard("7 Card", "Gives you the seven card if it is in the deck.", "\u001B[32m"),
+                new TrumpCard("Perfect Draw", "Draw the card still in the deck that gets you closest to the target while remaining under it.", "\u001B[92m"),
+                new TrumpCard("Extend", "Add 15 seconds to your move timer.", "\u001B[96m"),
+                new TrumpCard ("Rush", "Subtract 10 seconds from your opponent's move timer","\u001B[93m"),
+                new TrumpCard("Friendship", "Gives both players two trump cards.", "\u001B[95m"),
+                new TrumpCard("Destroy", "Removes opponent's last trump.", "\u001B[36m"),
+                new TrumpCard("Hush", "Draw a card your opponent cannot see.", "\u001B[36m"),
+                new TrumpCard("Dud", "This Trump Card does literally nothing. Sorry!", "\u001B[90m"),
             };
             System.out.println("\n--- AVAILABLE TRUMP CARDS ---");
             for (int i = 0; i < catalog.length; i++) {
@@ -691,6 +699,10 @@ public class Playgame
                     System.out.println("\n\u001B[1m-- FORCE-DRAW CARDS --\u001B[0m");
                 } else if (i == 23) 
                 {
+                    System.out.println("\n\u001B[1m-- TIMER MANIPULATION CARDS --\u001B[0m");
+                }
+                else if (i == 25)
+                {
                     System.out.println("\n\u001B[1m-- MISCELLANEOUS CARDS --\u001B[0m");
                 }
                 System.out.println(card.getColor() + i + ") " + name + "\u001B[0m");
@@ -699,10 +711,9 @@ public class Playgame
             if (userIntInput.hasNextInt()) {
                 int selection = userIntInput.nextInt();
                 userIntInput.nextLine();
-
                 if (selection >= 0 && selection < catalog.length) {
                     TrumpCard selected = catalog[selection];
-                    trumps.add(new TrumpCard(selected.getFunction(), "", selected.getColor()));
+                    trumps.add(new TrumpCard(selected.getFunction(), selected.getExplanation(), selected.getColor()));
                     if (targetPlayer == 1) PlayerTrumps++; else BotTrumps++;
                     System.out.println("Added " + selected.getColor() + selected.getFunction() + "\u001B[0m to " + targetName + ".");
                 } else {
@@ -782,77 +793,93 @@ public class Playgame
                 manageBetAndSaw();
             }
             break;
-            case 2:
-                System.out.print("Enter new saw position (0 to " + sawDistance + "): ");
-                if (userIntInput.hasNextInt()) 
+        case 2:
+            System.out.print("Enter new saw position (0 to " + sawDistance + "): ");
+            if (userIntInput.hasNextInt()) 
+            {
+                int newPos = userIntInput.nextInt();
+                userIntInput.nextLine();
+                sawPlace = newPos;
+                if (sawPlace < 0) sawPlace = 0;
+                if (sawPlace > sawDistance) sawPlace = sawDistance;
+                System.out.println("Saw position updated to: " + sawPlace);
+                System.out.println("\u001B[32mYou\u001B[0m are " + sawPlace + " spaces from death.");
+                int opponentSaw = sawDistance - sawPlace;
+                System.out.println("\u001B[31mYour opponent\u001B[0m is " + opponentSaw + " spaces from death.");
+            } 
+            else 
+            {
+                userIntInput.nextLine();
+                System.out.println("\u001B[31mInvalid input.\u001B[0m");
+            }
+            break;
+        case 3:
+            System.out.print("Enter new total saw distance: ");
+            if (userIntInput.hasNextInt()) 
+            {
+                int newDist = userIntInput.nextInt();
+                userIntInput.nextLine();
+                if (newDist > 2) 
                 {
-                    int newPos = userIntInput.nextInt();
-                    userIntInput.nextLine();
-                        sawPlace = newPos;
-                        if (sawPlace < 0) sawPlace = 0;
-                        if (sawPlace > sawDistance) sawPlace = sawDistance;
-                        System.out.println("Saw position updated to: " + sawPlace);
-                        System.out.println("\u001B[32mYou\u001B[0m are " + sawPlace + " spaces from death.");
-                        int opponentSaw = sawDistance - sawPlace;
-                        System.out.println("\u001B[31mYour opponent\u001B[0m is " + opponentSaw + " spaces from death.");
+                    sawDistance = newDist;
+                    if (sawPlace > sawDistance) sawPlace = sawDistance;
+                    System.out.println("Saw distance updated to: " + sawDistance);
+                    System.out.println("\u001B[32mYou\u001B[0m are " + sawPlace + " spaces from death.");
+                    int opponentSaw = sawDistance - sawPlace;
+                    System.out.println("\u001B[31mYour opponent\u001B[0m is " + opponentSaw + " spaces from death.");
                 } 
                 else 
                 {
-                    userIntInput.nextLine();
-                    System.out.println("\u001B[31mInvalid input.\u001B[0m");
+                    System.out.println("\u001B[31mDistance must be greater than 2.\u001B[0m");
                 }
-                break;
-            case 3:
-                System.out.print("Enter new total saw distance: ");
-                if (userIntInput.hasNextInt()) 
-                {
-                    int newDist = userIntInput.nextInt();
-                    userIntInput.nextLine();
-                    if (newDist > 2) 
-                    {
-                        sawDistance = newDist;
-                        if (sawPlace > sawDistance) sawPlace = sawDistance;
-                        System.out.println("Saw distance updated to: " + sawDistance);
-                        System.out.println("\u001B[32mYou\u001B[0m are " + sawPlace + " spaces from death.");
-                        int opponentSaw = sawDistance - sawPlace;
-                        System.out.println("\u001B[31mYour opponent\u001B[0m is " + opponentSaw + " spaces from death.");
-                    } 
-                    else 
-                    {
-                        System.out.println("\u001B[31mDistance must be greater than 2.\u001B[0m");
-                    }
-                } else 
-                {
-                    userIntInput.nextLine();
-                    System.out.println("\u001B[31mInvalid input.\u001B[0m");
-                }
-                break;
-            case 4:
-                bless = !bless;
-                System.out.println("Bless status toggled to: " + (bless ? "\u001B[96mACTIVE\u001B[0m" : "\u001B[90mINACTIVE\u001B[0m"));
-                break;
-            case 5:
-            	System.out.print("Enter new target score (0 to 66): ");
-            	int newTarget = userIntInput.nextInt();
-            	if (newTarget >= 0 && newTarget <= 66) target = newTarget;
-            	else System.out.println("\u001B[31mInvalid target.\u001B[0m");
-            default:
-                System.out.println("\u001B[31mInvalid choice.\u001B[0m");
+            } 
+            else 
+            {
+                userIntInput.nextLine();
+                System.out.println("\u001B[31mInvalid input.\u001B[0m");
+            }
+            break;
+        case 4:
+            bless = !bless;
+            System.out.println("Bless status toggled to: " + (bless ? "\u001B[96mACTIVE\u001B[0m" : "\u001B[90mINACTIVE\u001B[0m"));
+            break;
+        case 5:
+            System.out.print("Enter new target score (0 to 66): ");
+            int newTarget = userIntInput.nextInt();
+            userIntInput.nextLine();
+            if (newTarget >= 0 && newTarget <= 66) target = newTarget;
+            else System.out.println("\u001B[31mInvalid target.\u001B[0m");
+            break;
+        default:
+            System.out.println("\u001B[31mInvalid choice.\u001B[0m");
         }
     }
-    private static long editTimer()
+    private static long editTimer(long currentMillis)
     {
-        System.out.print("Enter new time limit in seconds (1 to 59): ");
-        int secs = userIntInput.nextInt();
-        userIntInput.nextLine();
-        if (secs > 0 && secs < 60) {
-            System.out.println("Timer updated to " + secs + " seconds.");
-            return secs * 1000L;
-        } else {
-            System.out.println("\u001B[31mInvalid duration. Must be between 1 and 59 seconds.\u001B[0m");
-            return 30000L;
+        System.out.print("Enter new time limit in seconds (must be at least 0): ");
+        long newTime = currentMillis;
+        if (userIntInput.hasNextInt())
+        {
+            int secs = userIntInput.nextInt();
+            userIntInput.nextLine();
+            if (secs >= 0)  
+            {
+                System.out.println("Timer updated to " + secs + " seconds.");
+                newTime = secs * 1000L;
+            }
+            else 
+            {
+                System.out.println("\u001B[31mInvalid duration. Must be at least 0.\u001B[0m");
+            }
         }
+        else
+        {
+            userIntInput.nextLine();
+            System.out.println("\u001B[31mInvalid input.\u001B[0m");
+        }
+        return newTime;
     }
+
     private static void recalculateScores()
     {
         userValue = 0;
@@ -1185,6 +1212,23 @@ public class Playgame
                 System.out.println("No card in the deck will help reach the target.");
             }
         }
+        else if (effect.equals("Extend"))
+        {
+            currentEndTime += 15000;
+            System.out.println(actorName + " \u001B[96mextended\u001B[0m the current turn timer by 15 seconds!");
+        }
+        else if (effect.equals("Rush"))
+        {
+        	if (moveTimer > 15000) 
+        		{
+        		moveTimer -= 10000;
+        		System.out.println(actorName + " \u001B[93mrushed\u001B[0m the next turn by 10 seconds!");
+        		}
+        	else 
+        	{
+        		System.out.println("You know, you have to let your opponent at least play.");
+        	}
+        }
         else if (effect.contains("Card")) 
         	{
             int targetNumber = Character.getNumericValue(effect.charAt(0)); 
@@ -1284,7 +1328,9 @@ public class Playgame
     {
         System.out.println("\n--- OPPONENT'S TURN ---");
         System.out.println("Your opponent is thinking.");
-        botTime = 0;
+        long botEndTime = System.currentTimeMillis() + moveTimer;
+        moveTimer = defaultMoveTimer;
+        boolean warned10 = false;
         int visibleUserScore;
         double estimatedUserScore;
         boolean userGuaranteedBust;
@@ -1296,48 +1342,79 @@ public class Playgame
         boolean botIsBust;
         boolean botIsLosing;
         boolean continueTrumpPhase = true;
-        while (continueTrumpPhase && (botTime < 6000))
+        while (continueTrumpPhase)
         {
+            long timeLeft = botEndTime - System.currentTimeMillis();
+            if (timeLeft <= 0)
+            {
+                System.out.println("\u001B[31mYour opponent ran out of time.\u001B[0m");
+                boolean hasLCard = false;
+                for (Card c : botPlayer) 
+                {
+                    if (c.getNumber() >= 100) hasLCard = true;
+                }
+                if (!hasLCard) 
+                {
+                    botPlayer.add(new Card(100, false));
+                    botValue += 100;
+                }
+                botStood = true;
+                return;
+            }
+            if (timeLeft <= 10000 && !warned10)
+            {
+                System.out.println("\n\u001B[31mYou hear the voice say 'Hurry up', and feel relieved it's not about you this time.\u001B[0m");
+                System.out.println();
+                warned10 = true;
+            }
+            boolean isHurrying = (timeLeft <= 8000);
             usedTrump = false;
             visibleUserScore = getVisibleUserScore();
-            estimatedUserScore = getEstimatedUserScore();
+            estimatedUserScore = isHurrying ? visibleUserScore : getEstimatedUserScore();
             userGuaranteedBust = isUserGuaranteedBust(visibleUserScore);
             bustChance = getBustProbability(botValue);
             botLives = sawDistance - sawPlace;
             userLives = sawPlace;
             botWouldDie = (botLives <= bet && !bless);
-            highStakes = (bet * 2 > botLives || userLives <= bet);
+            highStakes = ((bet * 2) > botLives || userLives <= bet);
             botIsBust = (botValue > target);
             botIsLosing = botIsBust || (!userGuaranteedBust && botValue < estimatedUserScore);
-            if (botIsBust && highStakes) 
+            if (!usedTrump && timeLeft <= 10000 && highStakes && botHasTrump("Extend"))
             {
-                botPause(1800);
-                double probUserBustedWorse = getProbabilityUserBustedWorseThan(botValue);
+                if (!isHurrying) botPause(200);
+                playBotTrump("Extend");
+                botEndTime += 15000;
+                usedTrump = true;
+            }
+            if (!usedTrump && botIsBust && highStakes) 
+            {
+                if (!isHurrying) botPause(1000);
+                double probUserBustedWorse = isHurrying ? 0.0 : getProbabilityUserBustedWorseThan(botValue);
                 if (probUserBustedWorse < 0.70)
                 {
                     if (botHasTrump("Go for 24") && botValue <= 24) 
                     { 
-                        botPause(100);
+                        if (!isHurrying) botPause(100);
                         playBotTrump("Go for 24"); 
                         usedTrump = true;
                         if (botHasTrump("Dud")) playBotTrump("Dud");
                     }
                     else if (botHasTrump("Go for 27") && botValue <= 27) 
                     { 
-                        botPause(100);
+                        if (!isHurrying) botPause(100);
                         playBotTrump("Go for 27"); 
                         usedTrump = true;
                         if (botHasTrump("Dud")) playBotTrump("Dud");
                     }
                     else if (botHasTrump("Return")) 
                     { 
-                        botPause(100);
+                        if (!isHurrying) botPause(100);
                         playBotTrump("Return"); 
                         usedTrump = true;
                     }
                     else if (botHasTrump("Refresh")) 
                     { 
-                        botPause(100);
+                        if (!isHurrying) botPause(100);
                         playBotTrump("Refresh"); 
                         usedTrump = true;
                     }
@@ -1348,7 +1425,7 @@ public class Playgame
                         boolean userLastIsLowerOrHidden = userLastCard.getHidden() || (userLastCard.getNumber() < botLastCard.getNumber());
                         if (userLastIsLowerOrHidden)
                         {
-                            botPause(100);
+                            if (!isHurrying) botPause(100);
                             playBotTrump("Exchange"); 
                             usedTrump = true;
                         }
@@ -1357,22 +1434,23 @@ public class Playgame
             }
             if (!usedTrump && highStakes) 
             {
-                botPause(500);
+                if (!isHurrying) botPause(300);
                 if (botHasTrump("Reveal") && userPlayer.get(0).getHidden()) 
                 {
                     playBotTrump("Reveal"); 
                     usedTrump = true;
                 }
-                else if (botHasTrump("Exchange") && visibleUserScore > botValue && visibleUserScore <= target) 
+                else if (!usedTrump && highStakes && moveTimer >= 15000 && botHasTrump("Rush"))
                 {
-                    playBotTrump("Exchange"); 
+                    if (!isHurrying) botPause(200);
+                    playBotTrump("Rush");
                     usedTrump = true;
                 }
             }
             int gap = target - botValue;
             if (!usedTrump && botIsLosing && highStakes && gap >= 1 && gap < 8) 
             {
-                botPause(800);
+                if (!isHurrying) botPause(400);
                 String cardNeeded = gap + " card";
                 if (botHasTrump(cardNeeded) && Card.isCardInDeck(gap)) 
                 {
@@ -1391,17 +1469,17 @@ public class Playgame
             }
             if (!usedTrump && botIsLosing && bustChance >= 0.50 && gap >= 1 && gap <= 8 && Card.isCardInDeck(gap) && botHasTrump("Perfect Draw")) 
             {
-                botPause(100);
+                if (!isHurrying) botPause(100);
                 playBotTrump("Perfect Draw"); 
                 usedTrump = true;
             }
-            if (!usedTrump && !botIsLosing) 
+            if (!usedTrump && (!botIsLosing || botWouldDie)) 
             {
                 if (botValue >= target - 1 && (highStakes || userLives - 2 <= bet)) 
                 {
                     if (botHasTrump("Two-up")) 
                     { 
-                        botPause(100);
+                        if (!isHurrying) botPause(100);
                         playBotTrump("Two-up"); 
                         usedTrump = true;
                         if (botHasTrump("Dud")) playBotTrump("Dud");
@@ -1411,7 +1489,7 @@ public class Playgame
                 {
                     if (botHasTrump("One-up")) 
                     { 
-                        botPause(100);
+                        if (!isHurrying) botPause(100);
                         playBotTrump("One-up"); 
                         usedTrump = true;
                         if (botHasTrump("Dud")) playBotTrump("Dud");
@@ -1420,7 +1498,7 @@ public class Playgame
             }
             if (!usedTrump && botWouldDie && (botIsLosing || botIsBust)) 
             {
-                botPause(300);
+                if (!isHurrying) botPause(200);
                 if (botHasTrump("Bless")) 
                 { 
                     playBotTrump("Bless"); 
@@ -1432,19 +1510,20 @@ public class Playgame
                 }
                 else if (botHasTrump("Shield+")) 
                 { 
-                    botPause(100);
+                    if (!isHurrying) botPause(100);
                     playBotTrump("Shield+"); 
                     usedTrump = true;
                     if (botHasTrump("Dud")) playBotTrump("Dud");
                 }
                 else if (botHasTrump("Shield")) 
                 { 
-                    botPause(100);
+                    if (!isHurrying) botPause(100);
                     playBotTrump("Shield"); 
                     usedTrump = true;
                     if (botHasTrump("Dud")) playBotTrump("Dud");
                 }
             }
+
             if (!usedTrump) 
             {
                 continueTrumpPhase = false;
@@ -1472,17 +1551,17 @@ public class Playgame
     }
     private static void botActionDraw() 
     {
-    	botPause(1600);
+        botPause(1000);
         if (Deck.deck.isEmpty()) 
         {
-        	if (!usedTrump)
-        	{
-            botStood = true;
-        	}
-        	else
-        	{
-        	userStood = false;
-        	}
+            if (!usedTrump)
+            {
+                botStood = true;
+            }
+            else
+            {
+                userStood = false;
+            }
             System.out.println("Your opponent decided to stay.");
         } 
         else 
@@ -1527,7 +1606,7 @@ public class Playgame
             {
                 if (!userPlayer.get(i).getHidden())
                 {
-                score += userPlayer.get(i).getNumber();
+                    score += userPlayer.get(i).getNumber();
                 }
             }
         }
@@ -1543,7 +1622,7 @@ public class Playgame
             for (Card c : botPlayer) if (c.getNumber() == val) cardIsGone = true;
             for (int i = 1; i < userPlayer.size(); i++) 
             {
-                if (userPlayer.get(i).getNumber() == val&&!userPlayer.get(i).getHidden()) cardIsGone = true;
+                if (userPlayer.get(i).getNumber() == val && !userPlayer.get(i).getHidden()) cardIsGone = true;
             }
             if (!cardIsGone) return false;
         }
@@ -1559,7 +1638,7 @@ public class Playgame
                 bustCards++;
             }
         }
-     return (double) bustCards / totalCardsLeft;
+        return (double) bustCards / totalCardsLeft;
     }
     public static int getUserHiddenCardCount() 
     {
@@ -1673,8 +1752,7 @@ public class Playgame
     {
         try 
         {
-       
-        Thread.sleep(millis);
+            Thread.sleep(millis);
         } 
         catch (InterruptedException e) 
         {
@@ -1781,12 +1859,5 @@ public class Playgame
     	{
     	    System.out.println();
     	}
-       // if (playingGame)
-       // {
-       //     System.out.println("\n Reshuffling cards...");
-       //     Thread.sleep(3000);
-       //     System.out.print("\u001B[H\u001B[2J");
-       //     System.out.flush();
-       // }
     }
 }

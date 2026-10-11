@@ -48,6 +48,11 @@ public class TrumpDeck
 			deck.add(new TrumpCard ("6 Card", "Gives you the six card if it is in the deck.","\u001B[32m"));
 			deck.add(new TrumpCard ("7 Card", "Gives you the seven card if it is in the deck.","\u001B[32m"));
 			deck.add(new TrumpCard ("Perfect Draw", "Draw the card still in the deck that gets you closest to the target while remaining under it.","\u001B[92m"));
+			// Timer Manipulation Cards
+			deck.add(new TrumpCard ("Extend", "Add 15 seconds to your move timer","\u001B[96m"));
+			deck.add(new TrumpCard ("Rush", "Subtract 10 seconds from your opponent's move timer","\u001B[93m"));
+			deck.add(new TrumpCard ("Extend", "Add 15 seconds to your move timer","\u001B[96m"));
+			deck.add(new TrumpCard ("Rush", "Subtract 10 seconds from your opponent's move timer","\u001B[93m"));
 			// Miscellaneous
 			deck.add(new TrumpCard ("Friendship", "Gives both players two trump cards.","\u001B[95m"));
 			deck.add(new TrumpCard ("Friendship", "Gives both players two trump cards.","\u001B[95m"));
@@ -61,9 +66,6 @@ public class TrumpDeck
 			deck.add(new TrumpCard ("Dud", "This Trump Card does literally nothing. Sorry!","\u001B[90m"));
 			deck.add(new TrumpCard ("Dud", "This Trump Card does literally nothing. Sorry!","\u001B[90m"));
 			deck.add(new TrumpCard ("Dud", "This Trump Card does literally nothing. Sorry!","\u001B[90m"));
-			// (TBA) Timer Manipulation Cards
-			// deck.add(new TrumpCard ("Extend", "Add 15 seconds to your move timer","\u001B[96m"));
-			// deck.add(new TrumpCard ("Rush", "Subtract 10 seconds from your opponent's move timer","\u001B[93m"));
 		}
 	public static void shuffle()
 		{
