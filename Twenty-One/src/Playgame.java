@@ -182,10 +182,9 @@ public class Playgame
                 System.out.print(cardText + comma);
                 looper++;
             }
-            System.out.println("\n\n1: Hit (Draw)");
-            System.out.println("2: Stand (Stay)");
-            System.out.println("3: View Trump Cards");
-
+            System.out.println("\n\n0: Stand (Stay)");
+            System.out.println("1: Hit (Draw)");
+            System.out.println("2: View Trump Cards");
             int choice = getTimedChoice(currentEndTime, "Select an option");
             if (choice == 1) 
             { 
@@ -216,7 +215,7 @@ public class Playgame
                     turnOver = true;
                 }
             }
-            else if (choice == 2) 
+            else if (choice == 0) 
             {
                 System.out.println("You decided to stay.");
                 if (!usedTrump) 
@@ -229,7 +228,7 @@ public class Playgame
                 }
                 turnOver = true;
             }
-            else if (choice == 3) 
+            else if (choice == 2) 
             {
                 PlayerTrump(); 
             } 
@@ -267,7 +266,7 @@ public class Playgame
             }
             else 
             {
-                System.out.println("\u001B[31mInvalid option! Please enter 1, 2, or 3.\u001B[0m");
+                System.out.println("\u001B[31mInvalid option! Please enter 0, 1, or 2.\u001B[0m");
             }
         }
     }
@@ -924,7 +923,6 @@ public class Playgame
         }
         return newTime;
     }
-
     private static void recalculateScores()
     {
         userValue = 0;
