@@ -22,6 +22,7 @@ public class Playgame
     static boolean botStood = false;
     static boolean isUserTurn = true;
     static boolean usedTrump = false;
+    static boolean firstTurnUser = true;
     static int target = 21;
     static Scanner userIntInput = new Scanner (System.in);
     static int PlayerTrumps = 0;
@@ -37,7 +38,7 @@ public class Playgame
             dealCard();
             userStood = false;
             botStood = false;
-            isUserTurn = true; 
+            isUserTurn = firstTurnUser;
             while (!userStood || !botStood) 
             {
                 if (isUserTurn) {
@@ -182,6 +183,24 @@ public class Playgame
                 System.out.print(cardText + comma);
                 looper++;
             }
+            System.out.print("\n\n\u001B[32mYour\u001B[0m Trump History: ");
+            if (userTrumpHistory.isEmpty()) 
+            {
+                System.out.println("None");
+            } 
+            else 
+            {
+                System.out.println(String.join(", ", userTrumpHistory));
+            }
+            System.out.print("\u001B[31mOpponent's\u001B[0m Trump History: ");
+            if (botTrumpHistory.isEmpty()) 
+            {
+                System.out.println("None");
+            } 
+            else 
+            {
+                System.out.println(String.join(", ", botTrumpHistory));
+            }
             System.out.println("\n\n0: Stand (Stay)");
             System.out.println("1: Hit (Draw)");
             System.out.println("2: View Trump Cards");
@@ -266,7 +285,7 @@ public class Playgame
             }
             else 
             {
-                System.out.println("\u001B[31mInvalid option! Please enter 0, 1, or 2.\u001B[0m");
+                System.out.println("\u001B[31mInvalid option! Please enter 0, 1, 2.\u001B[0m");
             }
         }
     }
@@ -504,6 +523,26 @@ public class Playgame
                 String comma = (i == botTrump.size() - 1) ? "" : ", ";
                 System.out.print(tc.getColor() + "[" + tc.getFunction() + "]\u001B[0m" + comma);
             }
+        }
+        System.out.println();
+        System.out.println();
+        System.out.print("\u001B[32m" + "Your" + "\u001B[0m Played Trumps: ");
+        if (userTrumpHistory.isEmpty()) 
+        {
+            System.out.println("None");
+        } 
+        else 
+        {
+            System.out.println(String.join(", ", userTrumpHistory));
+        }
+        System.out.print("\u001B[31mOpponent's\u001B[0m Played Trumps: ");
+        if (botTrumpHistory.isEmpty()) 
+        {
+            System.out.println("None");
+        } 
+        else 
+        {
+            System.out.println(String.join(", ", botTrumpHistory));
         }
         System.out.print("\n\nThe Remaining Deck, in Order: ");
         for (int i = 0; i < Deck.deck.size(); i++) 
@@ -1480,7 +1519,7 @@ public class Playgame
             }
             if (timeLeft <= 10000 && !warned10)
             {
-                System.out.println("\n\u001B[31mYou hear the voice say 'Hurry up', and feel relieved it's not talking to this time.\u001B[0m");
+                System.out.println("\n\u001B[31mYou hear the voice say 'Hurry up', and feel relieved it's not talking to you this time.\u001B[0m");
                 System.out.println();
                 warned10 = true;
             }
@@ -1953,6 +1992,7 @@ public class Playgame
             System.out.println("\u001B[32m" + "You!" + "\u001B[39m");
             System.out.println("(Your opponent's score of " + botScoreStr + " lost to your " + userScoreStr + ").");
             bet++;
+            firstTurnUser = false;
             try 
             {
 				Thread.sleep(3000);
@@ -1968,6 +2008,7 @@ public class Playgame
             System.out.println("\u001B[31m" + "Your opponent!" + "\u001B[39m");
             System.out.println("(Your opponent's score of " + botScoreStr + " beat your " + userScoreStr + ").");
             bet++;
+            firstTurnUser = true;
             try 
             {
 				Thread.sleep(3000);
