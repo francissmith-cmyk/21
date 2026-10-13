@@ -60,7 +60,7 @@ public class Playgame
                 }
             } 
             getWinner();
-            clearScreen(); 
+            if (playingGame) clearScreen(); 
         }
 }
     public static void Greetplayer()
@@ -415,7 +415,7 @@ public class Playgame
             System.out.println("2) Give any Card from the Deck or Remove Cards from either hand/Hide, or Reveal any Card in Either Hand");
             System.out.println("3) Give or Remove Trump Cards from Either Hand");
             System.out.println("4) Bet, Saw, and Target Modifier");
-            System.out.println("5) Edit Turn Timer");
+            System.out.println("5) Edit a Player's Turn Timer");
             System.out.print("Select an option: ");
             if (!userIntInput.hasNextInt()) {
                 userIntInput.nextLine();
@@ -531,7 +531,6 @@ public class Playgame
         }
         int action = userIntInput.nextInt();
         userIntInput.nextLine();
-
         if (action >= 1 && action <= 3)
         {
             System.out.print("Target (\u001B[31m0 = Bot\u001B[0m, \u001B[32m1 = User\u001B[0m): ");
@@ -752,42 +751,53 @@ public class Playgame
                 System.out.println(card.getColor() + i + ") " + name + "\u001B[0m");
             }
             System.out.print("\nSelect index of Trump Card to grant: ");
-            if (userIntInput.hasNextInt()) {
+            if (userIntInput.hasNextInt()) 
+            {
                 int selection = userIntInput.nextInt();
                 userIntInput.nextLine();
-                if (selection >= 0 && selection < catalog.length) {
+                if (selection >= 0 && selection < catalog.length) 
+                {
                     TrumpCard selected = catalog[selection];
                     trumps.add(new TrumpCard(selected.getFunction(), selected.getExplanation(), selected.getColor()));
                     if (targetPlayer == 1) PlayerTrumps++; else BotTrumps++;
                     System.out.println("Added " + selected.getColor() + selected.getFunction() + "\u001B[0m to " + targetName + ".");
-                } else {
+                } 
+                else 
+                {
                     System.out.println("\u001B[31mInvalid index.\u001B[0m");
                 }
-            } else {
+            } 
+            else 
+            {
                 userIntInput.nextLine();
             }
         }
         else if (action == 2)
         {
-            if (trumps.isEmpty()) {
+            if (trumps.isEmpty()) 
+            {
                 System.out.println("\u001B[31m" + targetName + " has no Trump cards to remove.\u001B[0m");
                 return;
             }
             System.out.println("\n--- CURRENT TRUMP CARDS (" + targetName.toUpperCase() + ") ---");
-            for (int i = 0; i < trumps.size(); i++) {
+            for (int i = 0; i < trumps.size(); i++) 
+            {
                 TrumpCard tc = trumps.get(i);
                 System.out.println(i + ") " + tc.getColor() + tc.getFunction() + "\u001B[0m");
             }
             System.out.print("Select index to remove: ");
-            if (userIntInput.hasNextInt()) {
+            if (userIntInput.hasNextInt()) 
+            {
                 int rIdx = userIntInput.nextInt();
                 userIntInput.nextLine();
-
-                if (rIdx >= 0 && rIdx < trumps.size()) {
+                if (rIdx >= 0 && rIdx < trumps.size()) 
+                {
                     TrumpCard removed = trumps.remove(rIdx);
                     if (targetPlayer == 1) PlayerTrumps--; else BotTrumps--;
                     System.out.println("Removed " + removed.getColor() + removed.getFunction() + "\u001B[0m from " + targetName + ".");
-                } else {
+                } 
+                else 
+                {
                     System.out.println("\u001B[31mInvalid index.\u001B[0m");
                 }
             } else {
@@ -900,20 +910,64 @@ public class Playgame
     }
     private static long editTimer(long currentMillis)
     {
-        System.out.print("Enter new time limit in seconds (must be at least 0): ");
+        System.out.println("\n--- EDIT TIMER ---");
+        System.out.println("1) Edit \u001B[32mUser's\u001B[0m Current Turn Timer (Current: " + (currentMillis / 1000) + "s)");
+        System.out.println("2) Edit \u001B[31mBot's\u001B[0m Next Move Timer (Current: " + (moveTimer / 1000) + "s)");
+        System.out.print("Choice: ");
         long newTime = currentMillis;
         if (userIntInput.hasNextInt())
         {
-            int secs = userIntInput.nextInt();
+            int targetChoice = userIntInput.nextInt();
             userIntInput.nextLine();
-            if (secs >= 0)  
+            if (targetChoice == 1)
             {
-                System.out.println("Timer updated to " + secs + " seconds.");
-                newTime = secs * 1000L;
+                System.out.print("Enter new remaining time for YOUR turn in seconds (must be >= 0): ");
+                if (userIntInput.hasNextInt())
+                {
+                    int secs = userIntInput.nextInt();
+                    userIntInput.nextLine();
+                    if (secs >= 0)
+                    {
+                        newTime = secs * 1000L;
+                        System.out.println("Your turn timer updated to " + secs + " seconds.");
+                    }
+                    else
+                    {
+                        System.out.println("\u001B[31mInvalid duration. Must be at least 0.\u001B[0m");
+                    }
+                }
+                else
+                {
+                    userIntInput.nextLine();
+                    System.out.println("\u001B[31mInvalid input.\u001B[0m");
+                }
             }
-            else 
+            else if (targetChoice == 2)
             {
-                System.out.println("\u001B[31mInvalid duration. Must be at least 0.\u001B[0m");
+                System.out.print("Enter new duration for OPPONENT'S next turn in seconds (must be >= 0): ");
+                if (userIntInput.hasNextInt())
+                {
+                    int secs = userIntInput.nextInt();
+                    userIntInput.nextLine();
+                    if (secs >= 0)
+                    {
+                        moveTimer = secs * 1000;
+                        System.out.println("Opponent's next move timer updated to " + secs + " seconds.");
+                    }
+                    else
+                    {
+                        System.out.println("\u001B[31mInvalid duration. Must be at least 0.\u001B[0m");
+                    }
+                }
+                else
+                {
+                    userIntInput.nextLine();
+                    System.out.println("\u001B[31mInvalid input.\u001B[0m");
+                }
+            }
+            else
+            {
+                System.out.println("\u001B[31mInvalid selection.\u001B[0m");
             }
         }
         else
