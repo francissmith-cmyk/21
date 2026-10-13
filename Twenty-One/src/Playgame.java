@@ -346,25 +346,21 @@ public class Playgame
                 executeTrumpEffect(chosenCard.getFunction());
             }
         }
-        else if (choice == -2 && !userTime)
-        {
-            System.out.println("\n\u001B[31mGood luck, loser.\u001B[0m");
-        }
         else
         {
             System.out.println(">> Invalid selection.");
         }
     }
-    public static int getTimedChoice(long endTime, String promptMsg) 
+    public static int getTimedChoice(long endTime, String promptMsg)
     {
         System.out.print(promptMsg + ": ");
         boolean warned10 = false;
         String message = "";
         try {
-            while (System.currentTimeMillis() < endTime) 
+            while (System.currentTimeMillis() < endTime)
             {
                 long timeLeft = (endTime - System.currentTimeMillis()) / 1000;
-                if (timeLeft <= 10 && !warned10) 
+                if (timeLeft <= 10 && !warned10)
                 {
                     int i = (int)(Math.random() * 2);
                     if (i == 0)
@@ -373,32 +369,32 @@ public class Playgame
                     }
                     else
                     {
-                        message = "Make your choice or lose.";    
+                        message = "Make your choice or lose.";
                     }
                     System.out.println("\n\u001B[31m" + message + "\u001B[0m");
-                    System.out.print(promptMsg + ": ");
+                    System.out.print("> ");
                     warned10 = true;
                 }
-                if (System.in.available() > 0) 
+                if (System.in.available() > 0)
                 {
                     String input = userIntInput.nextLine().trim();
-                    try 
+                    try
                     {
                         return Integer.parseInt(input);
-                    } 
-                    catch (NumberFormatException e) 
+                    }
+                    catch (NumberFormatException e)
                     {
                         return -1;
                     }
                 }
                 Thread.sleep(100);
             }
-        } 
-        catch (Exception e) 
+        }
+        catch (Exception e)
         {
             System.out.println("Error reading input.");
         }
-        
+       
         System.out.println();
         userTime = false;
         return -2;
