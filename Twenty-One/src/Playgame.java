@@ -285,7 +285,7 @@ public class Playgame
             }
             else 
             {
-                System.out.println("\u001B[31mInvalid option! Please enter 0, 1, 2.\u001B[0m");
+                System.out.println("\u001B[31mInvalid option! Please enter 0, 1, or 2.\u001B[0m");
             }
         }
     }
@@ -307,9 +307,11 @@ public class Playgame
         };
         java.util.Map<String, Integer> counts = new java.util.LinkedHashMap<>();
         java.util.Map<String, TrumpCard> cardMap = new java.util.HashMap<>();
-        for (TrumpCard tc : userTrump) {
+        for (TrumpCard tc : userTrump) 
+        {
             counts.put(tc.getFunction(), counts.getOrDefault(tc.getFunction(), 0) + 1);
-            if (!cardMap.containsKey(tc.getFunction())) {
+            if (!cardMap.containsKey(tc.getFunction())) 
+            {
                 cardMap.put(tc.getFunction(), tc);
             }
         }
@@ -1588,7 +1590,23 @@ public class Playgame
                     }
                 }
             }
-            if (!usedTrump && botHasTrump("Clairvoyance") && !Deck.deck.isEmpty())
+            boolean userHasCounterableTrump = userTrumpHistory.stream().anyMatch(e -> e.contains("Go for") || e.equals("One-up") || e.equals("Two-up") || e.equals("Bless"));
+            	if (!usedTrump && userHasCounterableTrump)
+            	{
+            	    if (botHasTrump("Reincarnation"))
+            	    {
+            	        if (!isHurrying) botPause(200);
+            	        playBotTrump("Reincarnation");
+            	        usedTrump = true;
+            	    }
+            	    else if (botHasTrump("Destroy"))
+            	    {
+            	        if (!isHurrying) botPause(200);
+            	        playBotTrump("Destroy");
+            	        usedTrump = true;
+            	    }
+            	}
+            if (!usedTrump && botHasTrump("Clairvoyance") && highStakes && !Deck.deck.isEmpty())
             {
                 Card topCard = Deck.deck.get(0);
                 int nextScore = botValue + topCard.getNumber();
@@ -1624,6 +1642,26 @@ public class Playgame
                 {
                     if (!isHurrying) botPause(200);
                     playBotTrump("Rush");
+                    usedTrump = true;
+                }
+            }
+            if (!usedTrump && botValue == 17 && visibleUserScore > 17 && botHasTrump("Go for 17"))
+            {
+                if (!isHurrying) botPause(200);
+                playBotTrump("Go for 17");
+                usedTrump = true;
+            }
+            if (!usedTrump && botHasTrump("Disservice") && highStakes && !Deck.deck.isEmpty()) 
+            {
+                double estimatedUser = getEstimatedUserScore();
+                double avgCardVal = getAverageAvailableCardValue();
+                double distanceToTarget = target - estimatedUser;
+                boolean userIsAtTarget = (estimatedUser == target && getUserHiddenCardCount() == 0);
+                boolean satisfiesDistanceCondition = (distanceToTarget < (3.0 - avgCardVal));
+                if (userIsAtTarget || satisfiesDistanceCondition) 
+                {
+                    if (!isHurrying) botPause(300);
+                    playBotTrump("Disservice");
                     usedTrump = true;
                 }
             }
@@ -1701,6 +1739,12 @@ public class Playgame
                     playBotTrump("Shield"); 
                     usedTrump = true;
                     if (botHasTrump("Dud")) playBotTrump("Dud");
+                }
+                else if (botHasTrump("Friendship"))
+                {
+                    if (!isHurrying) botPause(200);
+                    playBotTrump("Friendship");
+                    usedTrump = true;
                 }
             }
 
@@ -1943,6 +1987,32 @@ public class Playgame
             }
         }
         return totalCombinations == 0 ? 0.0 : ((double) worseBustCombinations / totalCombinations);
+    }
+    public static double getAverageAvailableCardValue() 
+    {
+        List<Integer> knownCards = new ArrayList<>();
+        for (Card c : botPlayer) {
+            knownCards.add(c.getNumber());
+        }
+        for (Card c : userPlayer) 
+        {
+            if (!c.getHidden()) 
+            {
+                knownCards.add(c.getNumber());
+            }
+        }
+        int totalAvailableSum = 0;
+        int availableCount = 0;
+        for (int val = 0; val <= 11; val++) 
+        {
+            if (!knownCards.contains(val)) 
+            {
+                totalAvailableSum += val;
+                availableCount++;
+            }
+        }
+        if (availableCount == 0) return 5.5;
+        return (double) totalAvailableSum / availableCount;
     }
     public static void botPause(int millis) 
     {
