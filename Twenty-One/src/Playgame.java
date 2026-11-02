@@ -1050,11 +1050,11 @@ public class Playgame
                 opponentPlayerList.remove(opponentPlayerList.size() - 1);
                 
                 String valStr = (removedCardVal >= 100) ? "\u001B[31mL\u001B[0m" : String.valueOf(removedCardVal);
-                System.out.println(actorName + " removed " + targetName + " last card (" + valStr + ").");
+                System.out.println(actorName + "\u001B[33mremoved\u001B[0m" + targetName + " last card (" + valStr + ").");
             } 
             else 
             {
-                System.out.println("Cannot remove " + targetName + " first card!");
+                System.out.println("Cannot \u001B[33mremove\u001B[0m " + targetName + " first card!");
             }
         }
         else if (effect.equals("Return")) 
@@ -1067,7 +1067,7 @@ public class Playgame
                 currentPlayerList.remove(currentPlayerList.size() - 1);
                 
                 String valStr = (removedCardVal >= 100) ? "\u001B[31mL\u001B[0m" : String.valueOf(removedCardVal);
-                System.out.println(actorName + "\u001B[33m returned \u001B[0m" + (isUserTurn ? "your" : "their") + " last card (" + valStr + ").");
+                System.out.println(actorName + "\u001B[33mreturned\u001B[0m" + (isUserTurn ? "your" : "their") + " last card (" + valStr + ").");
             } 
             else 
             {
@@ -1104,11 +1104,11 @@ public class Playgame
                     botValue += uCard.getNumber();
                     uCard.setHidden(false);
                 }
-                System.out.println(actorName + " swapped the last cards.");
+                System.out.println(actorName + " \u001B[33mswapped\u001B[0m the last cards.");
             }
             else
             {
-                System.out.println("Need at least 2 cards each to " + "\u001B[33m" + "exchange" + "\u001B[0m" + ".");
+                System.out.println("Need at least 2 cards each to \u001B[33mexchange\u001B[0m.");
             }
         }
         else if (effect.equals("Hush")) 
@@ -1239,7 +1239,7 @@ public class Playgame
                 revealed.setHidden(false);
                 if (isUserTurn) 
                 {
-                    System.out.println("You " + "\u001B[33m" + "revealed" + "\u001B[0m" + "your opponent's hidden card (Card " + (targetIdx + 1) + "): " + revealed.getNumber());
+                    System.out.println("You " + "\u001B[33m" + " revealed" + "\u001B[0m" + "your opponent's hidden card (Card " + (targetIdx + 1) + "): " + revealed.getNumber());
                 } else 
                 {
                     System.out.println("Your opponent peeked at your hidden card (Card " + (targetIdx + 1) + "): " + revealed.getNumber());
