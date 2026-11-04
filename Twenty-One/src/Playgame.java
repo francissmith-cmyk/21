@@ -23,6 +23,8 @@ public class Playgame
     static boolean isUserTurn = true;
     static boolean usedTrump = false;
     static boolean firstTurnUser = true;
+    static boolean lockDraw = false;
+    static boolean active21 = false;
     static int target = 21;
     static Scanner userIntInput = new Scanner (System.in);
     static int PlayerTrumps = 0;
@@ -127,6 +129,7 @@ public class Playgame
         botTrumpHistory.clear();
         bless = false;
         moveTimer = defaultMoveTimer;
+        lockDraw = false;
     }
     public static void userTurn() 
     {
@@ -152,10 +155,8 @@ public class Playgame
             System.out.println("Target: " + "\u001B[34m" + target + "\u001B[39m" + " | Your Score: " + displayUserScore + " | Bot's Visible Score: " + displayBotScore);
             System.out.println("Your Lives: " + "\u001B[32m" + sawPlace + "\u001B[39m" + " | Opponent's Lives: " + "\u001B[31m" + opponentSaw + "\u001B[39m" + " | Current Bet: " + "\u001B[34m" + bet + "\u001B[39m" + "\n");            
             
-            if (bless) 
-            {
-                System.out.println("\u001B[96m" + "The bless card is currently active!" + "\u001B[0m");
-            }
+            if (bless) System.out.println("\u001B[96m" + "The bless card is currently active. No death will occur this round." + "\u001B[0m");
+            if (active21) System.out.println("\u001B[31mThe 21-Up card is active. Either player hitting the exact target will raise the bet to 21.\u001B[0m");
             System.out.print("Your Hand: ");
             int looper = 0;
             for (Card c : userPlayer) {
@@ -202,10 +203,11 @@ public class Playgame
                 System.out.println(String.join(", ", botTrumpHistory));
             }
             System.out.println("\n\n0: Stand (Stay)");
-            System.out.println("1: Hit (Draw)");
+            if(!lockDraw) System.out.println("1: Hit (Draw)");
+            if(lockDraw) System.out.println("\u001B[31mYou cannot hit, the deck has been nuked.\u001B[0m");
             System.out.println("2: View Trump Cards");
             int choice = getTimedChoice(currentEndTime, "Select an option");
-            if (choice == 1) 
+            if (choice == 1&&!lockDraw) 
             { 
                 if (userValue > target) 
                 {
@@ -303,7 +305,8 @@ public class Playgame
             {"BET MANIPULATION CARDS", "One-up", "Two-up", "Shield", "Shield+", "Bloodshed", "Bless"},
             {"FORCE-DRAW CARDS", "2 Card", "3 Card", "4 Card", "5 Card", "6 Card", "7 Card", "Perfect Draw"},
             {"TIMER MANIPULATION CARDS", "Extend", "Rush"},
-            {"MISCELLANEOUS CARDS", "Friendship", "Destroy", "Hush", "Clairvoyance", "Dud"}
+            {"MISCELLANEOUS CARDS", "Friendship", "Destroy", "Hush", "Clairvoyance", "Dud"},
+            {"DEBUG EXCLUSIVE", "21-Up", "Wipeout", "Deck Nuke"}
         };
         java.util.Map<String, Integer> counts = new java.util.LinkedHashMap<>();
         java.util.Map<String, TrumpCard> cardMap = new java.util.HashMap<>();
@@ -758,6 +761,9 @@ public class Playgame
                 new TrumpCard("Hush", "Draw a card your opponent cannot see.", "\u001B[36m"),
                 new TrumpCard("Clairvoyance", "Peeks at the top 3 cards remaining in the deck.", "\u001B[36m"),
                 new TrumpCard("Dud", "This Trump Card does literally nothing. Sorry!", "\u001B[90m"),
+                new TrumpCard("21-Up", "Instantly sets the bet to 21 if you or your opponent has a score exactly equal to the target at the end of the round.", "\u001B[31m"),
+                new TrumpCard("Wipeout", "Steals every single Trump Card your opponent currently holds.", "\u001B[33m"),
+                new TrumpCard("Deck Nuke", "Completely empties the drawing deck, nobody will able to draw.", "\u001B[31m")
             };
             System.out.println("\n--- AVAILABLE TRUMP CARDS ---");
             for (int i = 0; i < catalog.length; i++) {
@@ -774,16 +780,22 @@ public class Playgame
                 else if (i == 10) 
                 {
                     System.out.println("\n\u001B[1m-- BET MANIPULATION CARDS --\u001B[0m");
-                } else if (i == 16) 
+                } 
+                else if (i == 16) 
                 {
                     System.out.println("\n\u001B[1m-- FORCE-DRAW CARDS --\u001B[0m");
-                } else if (i == 23) 
+                } 
+                else if (i == 23) 
                 {
                     System.out.println("\n\u001B[1m-- TIMER MANIPULATION CARDS --\u001B[0m");
                 }
                 else if (i == 25)
                 {
                     System.out.println("\n\u001B[1m-- MISCELLANEOUS CARDS --\u001B[0m");
+                }
+                else if (i == 30) 
+                {
+                System.out.println("\n\u001B[1m-- DEBUG EXCLUSIVE --\u001B[0m");
                 }
                 System.out.println(card.getColor() + i + ") " + name + "\u001B[0m");
             }
@@ -1155,7 +1167,6 @@ public class Playgame
         {
             bet++;
             System.out.println("The bet is now " + bet);
-            
             int TrumpIdx = (int)(Math.random() * TrumpDeck.size());
             TrumpCard drawnCard = TrumpDeck.deck.get(TrumpIdx);
             if (isUserTurn) 
@@ -1245,6 +1256,7 @@ public class Playgame
                     System.out.println("Your opponent peeked at your hidden card (Card " + (targetIdx + 1) + "): " + revealed.getNumber());
                 }
             } 
+            
             else 
             {
                 int chosenIdx = -1;
@@ -1434,6 +1446,36 @@ public class Playgame
             System.out.println(actorName + " gained a new Trump via " + "\u001B[93m" + "Reincarnation" + "\u001B[0m" + ".");
         undoOpponentTrump();
         }
+        else if (effect.equals("Deck Nuke"))
+        {
+        	lockDraw = true;
+        	System.out.println(actorName + " \u001B[31mnuked\u001B[0m the deck. Nobody can draw for this round.");
+        	currentHistory.add(effect);
+        }
+        else if (effect.equals("21-Up"))
+        {
+        	active21 = true;
+        	System.out.println(actorName + " used \u001B[31m21-Up\u001B[0m. If either score is equal to the target at the end of the round, the bet will become 21.");
+        	currentHistory.add(effect);
+        }
+        else if (effect.equals("Wipeout")) 
+        {
+            if (isUserTurn) 
+            {
+                userTrump.addAll(botTrump);
+                PlayerTrumps += botTrump.size();
+                botTrump.clear();
+                BotTrumps = 0;
+            } 
+            else 
+            {
+                botTrump.addAll(userTrump);
+                BotTrumps += userTrump.size();
+                userTrump.clear();
+                PlayerTrumps = 0;
+            }
+            System.out.println(actorName + " used \u001B[33mwipeout\u001B[0m and took every single Trump Card in both hands!");
+        }
         else 
         {
         	if (isUserTurn)
@@ -1475,10 +1517,17 @@ public class Playgame
             System.out.println(actorName + "\u001B[33m" + " removed " + "\u001B[0m" + oppPossessive + "\u001B[96m" + " Bless " + "\u001B[0m" + "Card."); 
             break;
             case "Dud":
-                System.out.println(actorName + "\u001B[33m" + " destroyed " + "\u001B[0m" + oppPossessive + "\u001B[90m" + " Dud " + "\u001B[0m" + "Card.");
+                System.out.println(actorName + "\u001B[33m" + " removed " + "\u001B[0m" + oppPossessive + "\u001B[90m" + " Dud " + "\u001B[0m" + "Card.");
+                break;
+            case "Deck Nuke": lockDraw = false; 
+                System.out.println(actorName + "\u001B[33m" + " removed " + "\u001B[0m" + oppPossessive + "\u001B[31m" + " Deck Nuke " + "\u001B[0m" + "Card."); 
+                break;
+            case "21-Up": 
+                active21 = false; 
+                System.out.println(actorName + "\u001B[33m removed \u001B[0m" + oppPossessive + "\u001B[31m21-Up\u001B[0mCard."); 
                 break;
             default:
-                System.out.println("That card cannot be countered.");
+                System.out.println("No removable cards.");
                 break;
         }
     }
@@ -1792,7 +1841,7 @@ public class Playgame
     private static void botActionDraw() 
     {
         botPause(1000);
-        if (Deck.deck.isEmpty()) 
+        if (Deck.deck.isEmpty()||lockDraw) 
         {
             if (!usedTrump)
             {
@@ -2027,6 +2076,12 @@ public class Playgame
     }
     public static void getWinner()
     {
+    	int usedBet = bet;
+    	if (active21 && (userValue == target || botValue == target)) 
+    	{
+    	    usedBet = 21;
+    	    System.out.println("The \u001B[1;31m21-Up\u001B[0m was triggered. The bet is now 21.");
+    	}
     	System.out.println();
     	for (Card c : userPlayer) c.setHidden(false);
         for (Card c : botPlayer) c.setHidden(false);
@@ -2058,7 +2113,7 @@ public class Playgame
         }
         else if (botValue > target && userValue <= target || (botValue > target && userValue > target && botValue > userValue) || (userValue <= target && botValue < userValue))
         {
-            sawPlace += bet;
+            sawPlace += usedBet;
             System.out.println("\u001B[32m" + "You!" + "\u001B[39m");
             System.out.println("(Your opponent's score of " + botScoreStr + " lost to your " + userScoreStr + ").");
             bet++;
@@ -2074,7 +2129,7 @@ public class Playgame
         }
         else 
         {
-            sawPlace -= bet;
+            sawPlace -= usedBet;
             System.out.println("\u001B[31m" + "Your opponent!" + "\u001B[39m");
             System.out.println("(Your opponent's score of " + botScoreStr + " beat your " + userScoreStr + ").");
             bet++;
