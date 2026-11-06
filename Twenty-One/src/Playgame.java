@@ -302,11 +302,11 @@ public class Playgame
         String[][] categories = {
             {"GO FOR CARDS", "Go for 17", "Go for 24", "Go for 27"},
             {"HAND MANIPULATION CARDS", "Remove", "Return", "Exchange", "Reincarnation", "Refresh", "Disservice", "Reveal"},
-            {"BET MANIPULATION CARDS", "One-up", "Two-up", "Shield", "Shield+", "Bloodshed", "Bless"},
+            {"BET MANIPULATION CARDS", "One-up", "Two-up", "Shield", "Shield+", "Bloodshed", "Bless", "21-Up"},
             {"FORCE-DRAW CARDS", "2 Card", "3 Card", "4 Card", "5 Card", "6 Card", "7 Card", "Perfect Draw"},
             {"TIMER MANIPULATION CARDS", "Extend", "Rush"},
             {"MISCELLANEOUS CARDS", "Friendship", "Destroy", "Hush", "Clairvoyance", "Dud"},
-            {"DEBUG EXCLUSIVE", "21-Up", "Wipeout", "Deck Nuke"}
+            {"DEBUG EXCLUSIVE", "Wipeout", "Deck Nuke"}
         };
         java.util.Map<String, Integer> counts = new java.util.LinkedHashMap<>();
         java.util.Map<String, TrumpCard> cardMap = new java.util.HashMap<>();
@@ -747,6 +747,7 @@ public class Playgame
                 new TrumpCard("Shield+", "Decreases bet by 2.", "\u001B[94m"),
                 new TrumpCard("Bloodshed", "Increases bet by one and gives you one trump card.", "\u001B[91m"),
                 new TrumpCard("Bless", "Nobody will die on this round. If someone would have, the bet is decreased by 1.", "\u001B[96m"),
+                new TrumpCard("21-Up", "Instantly sets the bet to 21 if you or your opponent has a score exactly equal to the target at the end of the round.", "\u001B[31m"),
                 new TrumpCard("2 Card", "Gives you the two card if it is in the deck.", "\u001B[32m"),
                 new TrumpCard("3 Card", "Gives you the three card if it is in the deck.", "\u001B[32m"),
                 new TrumpCard("4 Card", "Gives you the four card if it is in the deck.", "\u001B[32m"),
@@ -761,7 +762,6 @@ public class Playgame
                 new TrumpCard("Hush", "Draw a card your opponent cannot see.", "\u001B[36m"),
                 new TrumpCard("Clairvoyance", "Peeks at the top 3 cards remaining in the deck.", "\u001B[36m"),
                 new TrumpCard("Dud", "This Trump Card does literally nothing. Sorry!", "\u001B[90m"),
-                new TrumpCard("21-Up", "Instantly sets the bet to 21 if you or your opponent has a score exactly equal to the target at the end of the round.", "\u001B[31m"),
                 new TrumpCard("Wipeout", "Steals every single Trump Card your opponent currently holds.", "\u001B[33m"),
                 new TrumpCard("Deck Nuke", "Completely empties the drawing deck, nobody will able to draw.", "\u001B[31m")
             };
@@ -781,19 +781,19 @@ public class Playgame
                 {
                     System.out.println("\n\u001B[1m-- BET MANIPULATION CARDS --\u001B[0m");
                 } 
-                else if (i == 16) 
+                else if (i == 17) 
                 {
                     System.out.println("\n\u001B[1m-- FORCE-DRAW CARDS --\u001B[0m");
                 } 
-                else if (i == 23) 
+                else if (i == 24) 
                 {
                     System.out.println("\n\u001B[1m-- TIMER MANIPULATION CARDS --\u001B[0m");
                 }
-                else if (i == 25)
+                else if (i == 26)
                 {
                     System.out.println("\n\u001B[1m-- MISCELLANEOUS CARDS --\u001B[0m");
                 }
-                else if (i == 30) 
+                else if (i == 31) 
                 {
                 System.out.println("\n\u001B[1m-- DEBUG EXCLUSIVE --\u001B[0m");
                 }
@@ -1154,12 +1154,14 @@ public class Playgame
         else if (effect.equals("Shield"))
         {
             bet--;
+            if(bet < 0) bet = 0;
             System.out.println("The bet is now " + bet);
             currentHistory.add(effect);
         }
         else if (effect.equals("Shield+")) 
         {
             bet -= 2;
+            if(bet < 0) bet = 0;
             System.out.println("The bet is now " + bet);
             currentHistory.add(effect);
         }
@@ -1206,7 +1208,6 @@ public class Playgame
             }
             Deck.shuffle();
             currentPlayerList.clear();       
-            
             if (Deck.deck.size() >= 2) 
             {
                 currentPlayerList.add(Deck.deck.remove(0));
@@ -1582,7 +1583,7 @@ public class Playgame
             bustChance = getBustProbability(botValue);
             botLives = sawDistance - sawPlace;
             userLives = sawPlace;
-            botWouldDie = (botLives <= bet && !bless);
+            botWouldDie = ((botLives <= bet)||(active21 && botValue != target) && !bless);
             highStakes = ((bet * 2) > botLives || userLives <= bet);
             botIsBust = (botValue > target);
             botIsLosing = botIsBust || (!userGuaranteedBust && botValue < estimatedUserScore);
@@ -1601,27 +1602,27 @@ public class Playgame
                 {
                     if (botHasTrump("Go for 24") && botValue <= 24) 
                     { 
-                        if (!isHurrying) botPause(100);
+                    	botPause(200);
                         playBotTrump("Go for 24"); 
                         usedTrump = true;
                         if (botHasTrump("Dud")) playBotTrump("Dud");
                     }
                     else if (botHasTrump("Go for 27") && botValue <= 27) 
                     { 
-                        if (!isHurrying) botPause(100);
+                    	botPause(200);
                         playBotTrump("Go for 27"); 
                         usedTrump = true;
                         if (botHasTrump("Dud")) playBotTrump("Dud");
                     }
                     else if (botHasTrump("Return")) 
                     { 
-                        if (!isHurrying) botPause(100);
+                    	botPause(200);
                         playBotTrump("Return"); 
                         usedTrump = true;
                     }
                     else if (botHasTrump("Refresh")) 
                     { 
-                        if (!isHurrying) botPause(100);
+                    	botPause(200);
                         playBotTrump("Refresh"); 
                         usedTrump = true;
                     }
@@ -1632,7 +1633,7 @@ public class Playgame
                         boolean userLastIsLowerOrHidden = userLastCard.getHidden() || (userLastCard.getNumber() < botLastCard.getNumber());
                         if (userLastIsLowerOrHidden)
                         {
-                            if (!isHurrying) botPause(100);
+                        	botPause(100);
                             playBotTrump("Exchange"); 
                             usedTrump = true;
                         }
@@ -1644,13 +1645,13 @@ public class Playgame
             	{
             	    if (botHasTrump("Reincarnation"))
             	    {
-            	        if (!isHurrying) botPause(200);
+            	    	botPause(200);
             	        playBotTrump("Reincarnation");
             	        usedTrump = true;
             	    }
             	    else if (botHasTrump("Destroy"))
             	    {
-            	        if (!isHurrying) botPause(200);
+            	    	botPause(200);
             	        playBotTrump("Destroy");
             	        usedTrump = true;
             	    }
@@ -1661,42 +1662,42 @@ public class Playgame
                 int nextScore = botValue + topCard.getNumber();
                 if (botIsLosing || (nextScore <= target && nextScore > botValue) || botValue >= target - 5)
                 {
-                    if (!isHurrying) botPause(300);
+                	botPause(300);
                     playBotTrump("Clairvoyance");
                     usedTrump = true;
                     if (nextScore > target)
                     {
                         if (botHasTrump("Refresh"))
                         {
-                            if (!isHurrying) botPause(200);
+                        	botPause(200);
                             playBotTrump("Refresh");
                         }
                         else if (botHasTrump("Return") && botPlayer.size() > 1)
                         {
-                            if (!isHurrying) botPause(200);
+                        	botPause(200);
                             playBotTrump("Return");
                         }
                     }
                 }
             }
-            if (!usedTrump && highStakes) 
+            if (!isHurrying && !usedTrump && highStakes) 
             {
-                if (!isHurrying) botPause(300);
+            	botPause(300);
                 if (botHasTrump("Reveal") && userPlayer.get(0).getHidden()) 
                 {
                     playBotTrump("Reveal"); 
                     usedTrump = true;
                 }
-                else if (!usedTrump && highStakes && moveTimer >= 15000 && botHasTrump("Rush"))
+                else if (!isHurrying && !usedTrump && highStakes && moveTimer >= 15000 && botHasTrump("Rush"))
                 {
-                    if (!isHurrying) botPause(200);
+                	botPause(200);
                     playBotTrump("Rush");
                     usedTrump = true;
                 }
             }
             if (!usedTrump && botValue == 17 && visibleUserScore > 17 && botHasTrump("Go for 17"))
             {
-                if (!isHurrying) botPause(200);
+            	botPause(200);
                 playBotTrump("Go for 17");
                 usedTrump = true;
             }
@@ -1709,7 +1710,7 @@ public class Playgame
                 boolean satisfiesDistanceCondition = (distanceToTarget < (3.0 - avgCardVal));
                 if (userIsAtTarget || satisfiesDistanceCondition) 
                 {
-                    if (!isHurrying) botPause(300);
+                	botPause(300);
                     playBotTrump("Disservice");
                     usedTrump = true;
                 }
@@ -1717,7 +1718,7 @@ public class Playgame
             int gap = target - botValue;
             if (!usedTrump && botIsLosing && highStakes && gap >= 1 && gap < 8) 
             {
-                if (!isHurrying) botPause(400);
+            	botPause(400);
                 String cardNeeded = gap + " card";
                 if (botHasTrump(cardNeeded) && Card.isCardInDeck(gap)) 
                 {
@@ -1736,38 +1737,49 @@ public class Playgame
             }
             if (!usedTrump && botIsLosing && bustChance >= 0.50 && gap >= 1 && gap <= 8 && Card.isCardInDeck(gap) && botHasTrump("Perfect Draw")) 
             {
-                if (!isHurrying) botPause(100);
+            	botPause(100);
                 playBotTrump("Perfect Draw"); 
                 usedTrump = true;
             }
+
             if (!usedTrump && (!botIsLosing || botWouldDie)) 
             {
                 if (botValue >= target - 1 && (highStakes || userLives - 2 <= bet)) 
                 {
-                    if (botHasTrump("Two-up")) 
+                    if (botHasTrump("Two-up")&&!isHurrying) 
                     { 
-                        if (!isHurrying) botPause(100);
+                    	botPause(100);
                         playBotTrump("Two-up"); 
                         usedTrump = true;
                         if (botHasTrump("Dud")) playBotTrump("Dud");
                     }
                 }
-                if (!usedTrump && botValue >= target - 2 && (highStakes || userLives - 1 <= bet)) 
+                if (!isHurrying&&(!usedTrump && botValue >= target - 2 && (highStakes || userLives - 1 <= bet))) 
                 {
                     if (botHasTrump("One-up")) 
                     { 
-                        if (!isHurrying) botPause(100);
+                    	botPause(100);
                         playBotTrump("One-up"); 
                         usedTrump = true;
                         if (botHasTrump("Dud")) playBotTrump("Dud");
                     }
                 }
             }
+            if (botHasTrump("21-Up") && botValue == target && !active21) 
+            { 
+            	botPause(200);
+                playBotTrump("21-Up"); 
+                usedTrump = true;
+                while (botHasTrump("Dud")) 
+                {
+                    playBotTrump("Dud");
+                }
+            }
             if (!usedTrump && botWouldDie && (botIsLosing || botIsBust)) 
             {
-                if (!isHurrying) botPause(200);
                 if (botHasTrump("Bless")) 
                 { 
+                	botPause(200);
                     playBotTrump("Bless"); 
                     usedTrump = true;
                     while (botHasTrump("Dud")) 
@@ -1777,26 +1789,25 @@ public class Playgame
                 }
                 else if (botHasTrump("Shield+")) 
                 { 
-                    if (!isHurrying) botPause(100);
+                	botPause(100);
                     playBotTrump("Shield+"); 
                     usedTrump = true;
                     if (botHasTrump("Dud")) playBotTrump("Dud");
                 }
                 else if (botHasTrump("Shield")) 
                 { 
-                    if (!isHurrying) botPause(100);
+                	botPause(100);
                     playBotTrump("Shield"); 
                     usedTrump = true;
                     if (botHasTrump("Dud")) playBotTrump("Dud");
                 }
                 else if (botHasTrump("Friendship"))
                 {
-                    if (!isHurrying) botPause(200);
+                	botPause(200);
                     playBotTrump("Friendship");
                     usedTrump = true;
                 }
             }
-
             if (!usedTrump) 
             {
                 continueTrumpPhase = false;

@@ -5,6 +5,7 @@ public class TrumpDeck
 	public static ArrayList<TrumpCard> deck = new ArrayList<TrumpCard>();
 	public static void fillDeck()
 		{
+		int randomNum = (int)(Math.random() * 5);
 			deck.clear();
 			// Go for cards
 			deck.add(new TrumpCard("Go for 17", "Change target to 17","\u001B[35m"));
@@ -34,6 +35,7 @@ public class TrumpDeck
 			deck.add(new TrumpCard ("One-up", "Increases bet by 1.","\u001B[31m"));
 			deck.add(new TrumpCard ("Shield", "Decreases bet by 1.","\u001B[34m"));
 			deck.add(new TrumpCard ("Bless", "Nobody will die on this round. If someone would have, the bet is decreased by 1.","\u001B[96m"));
+			if(randomNum == 3) deck.add(new TrumpCard ("21-Up", "Instantly sets the bet to 21 if you or your opponent has a score exactly equal to the target at the end of the round.", "\u001B[31m"));
 			// Force-draw Cards
 			deck.add(new TrumpCard ("2 Card", "Gives you the two card if it is in the deck.","\u001B[32m"));
 			deck.add(new TrumpCard ("3 Card", "Gives you the three card if it is in the deck.","\u001B[32m"));
