@@ -21,11 +21,14 @@ public class TrumpDeck
 			deck.add(new TrumpCard("Remove", "Removes the last card in your opponent's hand, but it cannot be their first (hidden) card.","\u001B[33m"));
 			deck.add(new TrumpCard("Return", "Removes the last card in your hand. Cannot be your first card.","\u001B[33m"));
 			deck.add(new TrumpCard ("Exchange", "Switch out your last card with your opponent's last card.","\u001B[33m"));
-			deck.add(new TrumpCard ("Reincarnation", "Removes opponent's last trump + gives you one trump.","\u001B[93m"));
 			deck.add(new TrumpCard ("Refresh", "Removes all of your cards, gives you two fresh ones.","\u001B[33m"));
 			deck.add(new TrumpCard ("Disservice", "Forces your opponent to draw a random card.","\u001B[93m"));
 			deck.add(new TrumpCard ("Reveal", "Tells you your opponent's first card.","\u001B[33m"));
 			deck.add(new TrumpCard ("Reveal", "Tells you your opponent's first card.","\u001B[33m"));
+			// Trump Deck Manipulation Cards
+			deck.add(new TrumpCard ("Destroy", "Removes opponent's last trump.","\u001B[33m"));
+			deck.add(new TrumpCard ("Destroy", "Removes opponent's last trump.","\u001B[33m"));
+			deck.add(new TrumpCard ("Reincarnation", "Removes opponent's last trump + gives you one trump.","\u001B[93m"));
 			// Bet Manipulation Cards
 			deck.add(new TrumpCard ("One-up", "Increases bet by 1.","\u001B[31m"));
 			deck.add(new TrumpCard ("Two-up", "Increases bet by 2.","\u001B[91m"));
@@ -58,12 +61,12 @@ public class TrumpDeck
 			// Miscellaneous
 			deck.add(new TrumpCard ("Friendship", "Gives both players two trump cards.","\u001B[95m"));
 			deck.add(new TrumpCard ("Friendship", "Gives both players two trump cards.","\u001B[95m"));
-			deck.add(new TrumpCard ("Destroy", "Removes opponent's last trump.","\u001B[36m"));
-			deck.add(new TrumpCard ("Destroy", "Removes opponent's last trump.","\u001B[36m"));
 			deck.add(new TrumpCard ("Hush", "Draw a card your opponent cannot see.","\u001B[36m"));
 			deck.add(new TrumpCard ("Hush", "Draw a card your opponent cannot see.","\u001B[36m"));
 			deck.add(new TrumpCard ("Hush", "Draw a card your opponent cannot see.","\u001B[36m"));
-			deck.add(new TrumpCard("Clairvoyance", "Peeks at the top 3 cards remaining in the deck.", "\u001B[96m"));
+			deck.add(new TrumpCard ("Clairvoyance", "Peeks at the top 3 cards remaining in the deck.", "\u001B[96m"));
+			deck.add(new TrumpCard ("Shuffle", "Shuffles the remaining standard card deck.", "\u001B[36m"));
+			deck.add(new TrumpCard ("Shuffle", "Shuffles the remaining standard card deck.", "\u001B[36m"));
 			deck.add(new TrumpCard ("Dud", "This Trump Card does literally nothing. Sorry!","\u001B[90m"));
 			deck.add(new TrumpCard ("Dud", "This Trump Card does literally nothing. Sorry!","\u001B[90m"));
 			deck.add(new TrumpCard ("Dud", "This Trump Card does literally nothing. Sorry!","\u001B[90m"));

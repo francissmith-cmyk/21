@@ -302,10 +302,11 @@ public class Playgame
         String[][] categories = {
             {"GO FOR CARDS", "Go for 17", "Go for 24", "Go for 27"},
             {"HAND MANIPULATION CARDS", "Remove", "Return", "Exchange", "Reincarnation", "Refresh", "Disservice", "Reveal"},
+            {"TRUMP CARD MANIPULATION CARDS","Destroy","Reincarnation"},
             {"BET MANIPULATION CARDS", "One-up", "Two-up", "Shield", "Shield+", "Bloodshed", "Bless", "21-Up"},
             {"FORCE-DRAW CARDS", "2 Card", "3 Card", "4 Card", "5 Card", "6 Card", "7 Card", "Perfect Draw"},
             {"TIMER MANIPULATION CARDS", "Extend", "Rush"},
-            {"MISCELLANEOUS CARDS", "Friendship", "Destroy", "Hush", "Clairvoyance", "Dud"},
+            {"MISCELLANEOUS CARDS", "Friendship", "Hush", "Clairvoyance", "Shuffle", "Dud"},
             {"DEBUG EXCLUSIVE", "Wipeout", "Deck Nuke"}
         };
         java.util.Map<String, Integer> counts = new java.util.LinkedHashMap<>();
@@ -730,75 +731,82 @@ public class Playgame
         ArrayList<TrumpCard> trumps = (targetPlayer == 1) ? userTrump : botTrump;
         if (action == 1)
         {
-            TrumpCard[] catalog = new TrumpCard[] {
-                new TrumpCard("Go for 17", "Change target to 17", "\u001B[35m"),
-                new TrumpCard("Go for 24", "Change target to 24", "\u001B[35m"),
-                new TrumpCard("Go for 27", "Change target to 27", "\u001B[35m"),
-                new TrumpCard("Remove", "Removes the last card in your opponent's hand, but it cannot be their first (hidden) card.", "\u001B[33m"),
-                new TrumpCard("Return", "Removes the last card in your hand. Cannot be your first card.", "\u001B[33m"),
-                new TrumpCard("Exchange", "Switch out your last card with your opponent's last card.", "\u001B[33m"),
-                new TrumpCard("Reincarnation", "Removes opponent's last trump + gives you one trump.", "\u001B[93m"),
-                new TrumpCard("Refresh", "Removes all of your cards, gives you two fresh ones.", "\u001B[33m"),
-                new TrumpCard("Disservice", "Forces your opponent to draw a random card.", "\u001B[93m"),
-                new TrumpCard("Reveal", "Tells you your opponent's first card.", "\u001B[33m"),
-                new TrumpCard("One-up", "Increases bet by 1.", "\u001B[31m"),
-                new TrumpCard("Two-up", "Increases bet by 2.", "\u001B[91m"),
-                new TrumpCard("Shield", "Decreases bet by 1.", "\u001B[34m"),
-                new TrumpCard("Shield+", "Decreases bet by 2.", "\u001B[94m"),
-                new TrumpCard("Bloodshed", "Increases bet by one and gives you one trump card.", "\u001B[91m"),
-                new TrumpCard("Bless", "Nobody will die on this round. If someone would have, the bet is decreased by 1.", "\u001B[96m"),
-                new TrumpCard("21-Up", "Instantly sets the bet to 21 if you or your opponent has a score exactly equal to the target at the end of the round.", "\u001B[31m"),
-                new TrumpCard("2 Card", "Gives you the two card if it is in the deck.", "\u001B[32m"),
-                new TrumpCard("3 Card", "Gives you the three card if it is in the deck.", "\u001B[32m"),
-                new TrumpCard("4 Card", "Gives you the four card if it is in the deck.", "\u001B[32m"),
-                new TrumpCard("5 Card", "Gives you the five card if it is in the deck.", "\u001B[32m"),
-                new TrumpCard("6 Card", "Gives you the six card if it is in the deck.", "\u001B[32m"),
-                new TrumpCard("7 Card", "Gives you the seven card if it is in the deck.", "\u001B[32m"),
-                new TrumpCard("Perfect Draw", "Draw the card still in the deck that gets you closest to the target while remaining under it.", "\u001B[92m"),
-                new TrumpCard("Extend", "Add 15 seconds to your move timer.", "\u001B[96m"),
-                new TrumpCard ("Rush", "Subtract 10 seconds from your opponent's move timer","\u001B[93m"),
-                new TrumpCard("Friendship", "Gives both players two trump cards.", "\u001B[95m"),
-                new TrumpCard("Destroy", "Removes opponent's last trump.", "\u001B[36m"),
-                new TrumpCard("Hush", "Draw a card your opponent cannot see.", "\u001B[36m"),
-                new TrumpCard("Clairvoyance", "Peeks at the top 3 cards remaining in the deck.", "\u001B[36m"),
-                new TrumpCard("Dud", "This Trump Card does literally nothing. Sorry!", "\u001B[90m"),
-                new TrumpCard("Wipeout", "Steals every single Trump Card your opponent currently holds.", "\u001B[33m"),
-                new TrumpCard("Deck Nuke", "Completely empties the drawing deck, nobody will able to draw.", "\u001B[31m")
-            };
-            System.out.println("\n--- AVAILABLE TRUMP CARDS ---");
-            for (int i = 0; i < catalog.length; i++) {
-                TrumpCard card = catalog[i];
-                String name = card.getFunction();
-                if (i == 0) 
-                {
-                    System.out.println("\u001B[1m-- GO FOR CARDS --\u001B[0m");
-                } 
-                else if (i == 3) 
-                {
-                    System.out.println("\n\u001B[1m-- HAND MANIPULATION CARDS --\u001B[0m");
-                } 
-                else if (i == 10) 
-                {
-                    System.out.println("\n\u001B[1m-- BET MANIPULATION CARDS --\u001B[0m");
-                } 
-                else if (i == 17) 
-                {
-                    System.out.println("\n\u001B[1m-- FORCE-DRAW CARDS --\u001B[0m");
-                } 
-                else if (i == 24) 
-                {
-                    System.out.println("\n\u001B[1m-- TIMER MANIPULATION CARDS --\u001B[0m");
-                }
-                else if (i == 26)
-                {
-                    System.out.println("\n\u001B[1m-- MISCELLANEOUS CARDS --\u001B[0m");
-                }
-                else if (i == 31) 
-                {
-                System.out.println("\n\u001B[1m-- DEBUG EXCLUSIVE --\u001B[0m");
-                }
-                System.out.println(card.getColor() + i + ") " + name + "\u001B[0m");
-            }
+        	TrumpCard[] catalog = new TrumpCard[] {
+        	        new TrumpCard("Go for 17", "Change target to 17", "\u001B[35m"),
+        	        new TrumpCard("Go for 24", "Change target to 24", "\u001B[35m"),
+        	        new TrumpCard("Go for 27", "Change target to 27", "\u001B[35m"),
+        	        new TrumpCard("Remove", "Removes the last card in your opponent's hand, but it cannot be their first (hidden) card.", "\u001B[33m"),
+        	        new TrumpCard("Return", "Removes the last card in your hand. Cannot be your first card.", "\u001B[33m"),
+        	        new TrumpCard("Exchange", "Switch out your last card with your opponent's last card.", "\u001B[33m"),
+        	        new TrumpCard("Refresh", "Removes all of your cards, gives you two fresh ones.", "\u001B[33m"),
+        	        new TrumpCard("Disservice", "Forces your opponent to draw a random card.", "\u001B[93m"),
+        	        new TrumpCard("Reveal", "Tells you your opponent's first card.", "\u001B[33m"),
+           	        new TrumpCard("Destroy", "Removes opponent's last trump.", "\u001B[33m"),
+        	        new TrumpCard("Reincarnation", "Removes opponent's last trump + gives you one trump.", "\u001B[93m"),
+        	        new TrumpCard("One-up", "Increases bet by 1.", "\u001B[31m"),
+        	        new TrumpCard("Two-up", "Increases bet by 2.", "\u001B[91m"),
+        	        new TrumpCard("Shield", "Decreases bet by 1.", "\u001B[34m"),
+        	        new TrumpCard("Shield+", "Decreases bet by 2.", "\u001B[94m"),
+        	        new TrumpCard("Bloodshed", "Increases bet by one and gives you one trump card.", "\u001B[91m"),
+        	        new TrumpCard("Bless", "Nobody will die on this round. If someone would have, the bet is decreased by 1.", "\u001B[96m"),
+        	        new TrumpCard("21-Up", "Instantly sets the bet to 21 if you or your opponent has a score exactly equal to the target at the end of the round.", "\u001B[31m"),
+        	        new TrumpCard("2 Card", "Gives you the two card if it is in the deck.", "\u001B[32m"),
+        	        new TrumpCard("3 Card", "Gives you the three card if it is in the deck.", "\u001B[32m"),
+        	        new TrumpCard("4 Card", "Gives you the four card if it is in the deck.", "\u001B[32m"),
+        	        new TrumpCard("5 Card", "Gives you the five card if it is in the deck.", "\u001B[32m"),
+        	        new TrumpCard("6 Card", "Gives you the six card if it is in the deck.", "\u001B[32m"),
+        	        new TrumpCard("7 Card", "Gives you the seven card if it is in the deck.", "\u001B[32m"),
+        	        new TrumpCard("Perfect Draw", "Draw the card still in the deck that gets you closest to the target while remaining under it.", "\u001B[92m"),
+        	        new TrumpCard("Extend", "Add 15 seconds to your move timer.", "\u001B[96m"),
+        	        new TrumpCard("Rush", "Subtract 10 seconds from your opponent's move timer", "\u001B[93m"),
+        	        new TrumpCard("Friendship", "Gives both players two trump cards.", "\u001B[95m"),
+        	        new TrumpCard("Hush", "Draw a card your opponent cannot see.", "\u001B[36m"),
+        	        new TrumpCard("Clairvoyance", "Peeks at the top 3 cards remaining in the deck.", "\u001B[36m"),
+        	        new TrumpCard("Shuffle", "Shuffles the remaining standard card deck.", "\u001B[36m"),
+        	        new TrumpCard("Dud", "This Trump Card does literally nothing. Sorry!", "\u001B[90m"),
+        	        new TrumpCard("Wipeout", "Steals every single Trump Card your opponent currently holds.", "\u001B[33m"),
+        	        new TrumpCard("Deck Nuke", "Completely empties the drawing deck, nobody will able to draw.", "\u001B[31m")
+        	    };
+        	    System.out.println("\n--- AVAILABLE TRUMP CARDS ---");
+        	    for (int i = 0; i < catalog.length; i++) {
+        	        TrumpCard card = catalog[i];
+        	        String name = card.getFunction();
+        	        
+        	        if (i == 0) 
+        	        {
+        	            System.out.println("\u001B[1m-- GO FOR CARDS --\u001B[0m");
+        	        } 
+        	        else if (i == 3) 
+        	        {
+        	            System.out.println("\n\u001B[1m-- HAND MANIPULATION CARDS --\u001B[0m");
+        	        } 
+        	        else if (i == 9)
+        	        {
+        	            System.out.println("\n\u001B[1m-- TRUMP MANIPULATION CARDS --\u001B[0m");
+        	        }
+        	        else if (i == 11) 
+        	        {
+        	            System.out.println("\n\u001B[1m-- BET MANIPULATION CARDS --\u001B[0m");
+        	        } 
+        	        else if (i == 18) 
+        	        {
+        	            System.out.println("\n\u001B[1m-- FORCE-DRAW CARDS --\u001B[0m");
+        	        } 
+        	        else if (i == 25) 
+        	        {
+        	            System.out.println("\n\u001B[1m-- TIMER MANIPULATION CARDS --\u001B[0m");
+        	        }
+        	        else if (i == 27)
+        	        {
+        	            System.out.println("\n\u001B[1m-- MISCELLANEOUS CARDS --\u001B[0m");
+        	        }
+        	        else if (i == 32) 
+        	        {
+        	            System.out.println("\n\u001B[1m-- DEBUG EXCLUSIVE --\u001B[0m");
+        	        }
+        	        
+        	        System.out.println(card.getColor() + i + ") " + name + "\u001B[0m");
+        	    }
             System.out.print("\nSelect index of Trump Card to grant: ");
             if (userIntInput.hasNextInt()) 
             {
@@ -1477,6 +1485,11 @@ public class Playgame
             }
             System.out.println(actorName + " used \u001B[33mwipeout\u001B[0m and took every single Trump Card in both hands!");
         }
+        else if (effect.equals("Shuffle"))
+        {
+            Deck.shuffle();
+            System.out.println(actorName + " \u001B[36mshuffled\u001B[0m the remaining deck!");
+        }
         else 
         {
         	if (isUserTurn)
@@ -1667,7 +1680,13 @@ public class Playgame
                     usedTrump = true;
                     if (nextScore > target)
                     {
-                        if (botHasTrump("Refresh"))
+                    	if (botHasTrump("Shuffle"))
+                        {
+                         	botPause(200);
+                            playBotTrump("Shuffle");
+                            usedTrump = true;
+                        }
+                    	else if (botHasTrump("Refresh"))
                         {
                         	botPause(200);
                             playBotTrump("Refresh");
