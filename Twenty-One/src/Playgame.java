@@ -1259,7 +1259,7 @@ public class Playgame
                 revealed.setHidden(false);
                 if (isUserTurn) 
                 {
-                    System.out.println("You " + "\u001B[33m" + " revealed" + "\u001B[0m" + "your opponent's hidden card (Card " + (targetIdx + 1) + "): " + revealed.getNumber());
+                    System.out.println("You " + "\u001B[33m" + " revealed " + "\u001B[0m" + "your opponent's hidden card (Card " + (targetIdx + 1) + "): " + revealed.getNumber());
                 } else 
                 {
                     System.out.println("Your opponent peeked at your hidden card (Card " + (targetIdx + 1) + "): " + revealed.getNumber());
