@@ -1087,7 +1087,7 @@ public class Playgame
                 currentPlayerList.remove(currentPlayerList.size() - 1);
                 
                 String valStr = (removedCardVal >= 100) ? "\u001B[31mL\u001B[0m" : String.valueOf(removedCardVal);
-                System.out.println(actorName + "\u001B[33mreturned\u001B[0m" + (isUserTurn ? "your" : "their") + " last card (" + valStr + ").");
+                System.out.println(actorName + "\u001B[33m returned \u001B[0m" + (isUserTurn ? "your" : "their") + " last card (" + valStr + ").");
             } 
             else 
             {
