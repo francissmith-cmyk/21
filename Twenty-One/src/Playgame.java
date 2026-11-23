@@ -128,6 +128,7 @@ public class Playgame
         userTrumpHistory.clear();
         botTrumpHistory.clear();
         bless = false;
+        active21 = false;
         moveTimer = defaultMoveTimer;
         lockDraw = false;
     }
